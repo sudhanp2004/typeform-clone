@@ -55,6 +55,13 @@ export function PublicFormRunner({ formId }: { formId: string }) {
     if (!responseId) return;
     const payload = Object.entries(answers).map(([question_id, value]) => ({ question_id, value }));
     await submitPublicResponse(formId, responseId, payload, true);
+    // If the form has a redirect ending, send the user there
+    if (
+      form?.thank_you_screen?.ending_type === "redirect" &&
+      form?.thank_you_screen?.redirect_url
+    ) {
+      window.location.href = form.thank_you_screen.redirect_url;
+    }
   };
 
   return <RespondentFlow form={form} onComplete={handleComplete} />;

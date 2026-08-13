@@ -59,6 +59,8 @@ export interface FormListItem {
 export interface ScreenContent {
   title?: string;
   subtitle?: string;
+  ending_type?: "screen" | "redirect";
+  redirect_url?: string;
 }
 
 export interface FormTheme {

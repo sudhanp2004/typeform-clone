@@ -205,6 +205,17 @@ export function FormBuilder({ formId }: { formId: string }) {
     }
   };
 
+  const handleChangeEndingType = async (type: "screen" | "redirect") => {
+    const next: ScreenContent = { ...form.thank_you_screen, ending_type: type };
+    setForm((f) => (f ? { ...f, thank_you_screen: next } : f));
+    setSelection({ kind: "ending" });
+    try {
+      await updateForm(formId, { thank_you_screen: next });
+    } catch {
+      showToast("Couldn't update the ending type", "error");
+    }
+  };
+
   const handleUpdateTheme = async (patch: Partial<FormTheme>) => {
     const nextTheme = { ...form.theme, ...patch };
     setForm((f) => (f ? { ...f, theme: nextTheme } : f));
@@ -263,6 +274,7 @@ export function FormBuilder({ formId }: { formId: string }) {
                 screen={form.thank_you_screen}
                 selected={selection?.kind === "ending"}
                 onSelect={() => setSelection({ kind: "ending" })}
+                onChangeType={handleChangeEndingType}
               />
             </div>
 
