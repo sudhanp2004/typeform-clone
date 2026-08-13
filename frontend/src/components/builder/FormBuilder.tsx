@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   addQuestion,
   deleteQuestion,
@@ -31,12 +32,14 @@ type Selection = { kind: "question"; id: string } | { kind: "welcome" } | { kind
 
 export function FormBuilder({ formId }: { formId: string }) {
   const [form, setForm] = useState<FormDetail | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [activeTab, setActiveTab] = useState<BuilderTab>("content");
   const [addPickerOpen, setAddPickerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [designOpen, setDesignOpen] = useState(false);
   const { showToast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     getForm(formId)
@@ -44,9 +47,22 @@ export function FormBuilder({ formId }: { formId: string }) {
         setForm(data);
         setSelection(data.questions[0] ? { kind: "question", id: data.questions[0].id } : null);
       })
-      .catch(() => showToast("Couldn't load this form", "error"));
+      .catch(() => {
+        setNotFound(true);
+        showToast("Form not found — it may have been deleted", "error");
+        setTimeout(() => router.replace("/forms"), 2000);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formId]);
+
+  if (notFound) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
+        <p className="text-lg font-semibold text-ink">Form not found</p>
+        <p className="text-sm text-ink-soft">Redirecting to your dashboard…</p>
+      </div>
+    );
+  }
 
   if (!form) {
     return <div className="flex flex-1 items-center justify-center text-ink-soft">Loading…</div>;

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { exportResponsesUrl, getForm, getResponse, getResponseSummary, listResponses } from "@/lib/api";
 import type { FormDetail, QuestionSummary, ResponseDetail, ResponseListItem } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
@@ -20,7 +21,9 @@ export function ResponsesView({ formId }: { formId: string }) {
   const [summary, setSummary] = useState<QuestionSummary[] | null>(null);
   const [responses, setResponses] = useState<ResponseListItem[] | null>(null);
   const [selectedResponse, setSelectedResponse] = useState<ResponseDetail | null>(null);
+  const [notFound, setNotFound] = useState(false);
   const { showToast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     Promise.all([getForm(formId), getResponseSummary(formId), listResponses(formId)])
@@ -29,7 +32,11 @@ export function ResponsesView({ formId }: { formId: string }) {
         setSummary(summaryData);
         setResponses(responsesData);
       })
-      .catch(() => showToast("Couldn't load responses", "error"));
+      .catch(() => {
+        setNotFound(true);
+        showToast("Form not found — it may have been deleted", "error");
+        setTimeout(() => router.replace("/forms"), 2000);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formId]);
 
@@ -41,6 +48,15 @@ export function ResponsesView({ formId }: { formId: string }) {
       showToast("Couldn't load that response", "error");
     }
   };
+
+  if (notFound) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-2 text-center">
+        <p className="text-lg font-semibold text-ink">Form not found</p>
+        <p className="text-sm text-ink-soft">Redirecting to your dashboard…</p>
+      </div>
+    );
+  }
 
   if (!form || !summary || !responses) {
     return <div className="flex h-screen items-center justify-center text-ink-soft">Loading…</div>;
