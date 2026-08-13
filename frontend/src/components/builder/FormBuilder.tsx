@@ -40,7 +40,6 @@ export function FormBuilder({ formId }: { formId: string }) {
   const [activeTab, setActiveTab] = useState<BuilderTab>("content");
   const [addPickerOpen, setAddPickerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [designOpen, setDesignOpen] = useState(false);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [showPublishSuccess, setShowPublishSuccess] = useState(false);
   const { showToast } = useToast();
@@ -259,7 +258,8 @@ export function FormBuilder({ formId }: { formId: string }) {
             }}
             onAddClick={() => setAddPickerOpen(true)}
             onPreviewClick={() => setPreviewOpen(true)}
-            onDesignClick={() => setDesignOpen(true)}
+            theme={form.theme}
+            onUpdateTheme={handleUpdateTheme}
             device={device}
             onToggleDevice={() => setDevice(d => d === "desktop" ? "mobile" : "desktop")}
           />
@@ -361,13 +361,6 @@ export function FormBuilder({ formId }: { formId: string }) {
       )}
 
       <QuestionTypePicker open={addPickerOpen} onClose={() => setAddPickerOpen(false)} onPick={handleAddQuestion} />
-
-      <DesignPanel
-        open={designOpen}
-        onClose={() => setDesignOpen(false)}
-        theme={form.theme}
-        onUpdate={handleUpdateTheme}
-      />
 
       {previewOpen && (
         <div className="fixed inset-0 z-50 bg-paper">

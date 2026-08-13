@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { FormMode } from "@/lib/types";
+import type { FormMode, FormTheme } from "@/lib/types";
+import { DesignPanel } from "./DesignPanel";
 
 const MODES: { id: FormMode; label: string; description: string; icon: string; locked?: boolean }[] = [
   { id: "universal", label: "Universal mode", description: "Create any form.", icon: "☰" },
@@ -15,19 +16,23 @@ interface BuilderToolbarProps {
   onModeChange: (mode: FormMode) => void;
   onAddClick: () => void;
   onPreviewClick: () => void;
-  onDesignClick: () => void;
+  theme: FormTheme;
+  onUpdateTheme: (patch: Partial<FormTheme>) => void;
   device: "desktop" | "mobile";
   onToggleDevice: () => void;
 }
 
-export function BuilderToolbar({ formMode, onModeChange, onAddClick, onPreviewClick, onDesignClick, device, onToggleDevice }: BuilderToolbarProps) {
+export function BuilderToolbar({ formMode, onModeChange, onAddClick, onPreviewClick, theme, onUpdateTheme, device, onToggleDevice }: BuilderToolbarProps) {
   const [open, setOpen] = useState(false);
+  const [designOpen, setDesignOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const designRef = useRef<HTMLDivElement>(null);
   const currentMode = MODES.find((m) => m.id === formMode) ?? MODES[0];
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (designRef.current && !designRef.current.contains(e.target as Node)) setDesignOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -88,13 +93,25 @@ export function BuilderToolbar({ formMode, onModeChange, onAddClick, onPreviewCl
         >
           + Add content
         </button>
-        <button
-          onClick={onDesignClick}
-          className="ml-1 flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-ink-soft hover:bg-paper-soft hover:text-ink"
-        >
-          <span aria-hidden className="h-3.5 w-3.5 rounded-full bg-gradient-to-br from-rose-300 via-amber-300 to-sky-400" />
-          Design
-        </button>
+        <div className="relative ml-1" ref={designRef}>
+          <button
+            onClick={() => setDesignOpen((v) => !v)}
+            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ${
+              designOpen ? "bg-paper-soft text-ink" : "text-ink-soft hover:bg-paper-soft hover:text-ink"
+            }`}
+          >
+            <span aria-hidden className="h-3.5 w-3.5 rounded-full bg-gradient-to-br from-rose-300 via-amber-300 to-sky-400" />
+            Design
+          </button>
+          
+          {designOpen && (
+            <DesignPanel
+              theme={theme}
+              onUpdate={onUpdateTheme}
+              onClose={() => setDesignOpen(false)}
+            />
+          )}
+        </div>
         <div className="mx-1 h-5 w-px bg-line" />
         {/* Utility icons */}
         {[
