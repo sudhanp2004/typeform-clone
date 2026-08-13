@@ -48,7 +48,7 @@ class Form(Base):
     __tablename__ = "forms"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
-    creator_id: Mapped[str] = mapped_column(ForeignKey("creators.id"), nullable=False)
+    creator_id: Mapped[str] = mapped_column(ForeignKey("creators.id", ondelete="CASCADE"), index=True, nullable=False)
     slug: Mapped[str | None] = mapped_column(String, nullable=True, unique=True)
     title: Mapped[str] = mapped_column(String, nullable=False, default="Untitled form")
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -72,7 +72,7 @@ class Question(Base):
     __tablename__ = "questions"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
-    form_id: Mapped[str] = mapped_column(ForeignKey("forms.id"), nullable=False)
+    form_id: Mapped[str] = mapped_column(ForeignKey("forms.id", ondelete="CASCADE"), index=True, nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)
     title: Mapped[str] = mapped_column(String, nullable=False, default="")
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -93,7 +93,7 @@ class Response(Base):
     __tablename__ = "responses"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
-    form_id: Mapped[str] = mapped_column(ForeignKey("forms.id"), nullable=False)
+    form_id: Mapped[str] = mapped_column(ForeignKey("forms.id", ondelete="CASCADE"), index=True, nullable=False)
     is_complete: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -108,8 +108,8 @@ class Answer(Base):
     __tablename__ = "answers"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
-    response_id: Mapped[str] = mapped_column(ForeignKey("responses.id"), nullable=False)
-    question_id: Mapped[str] = mapped_column(ForeignKey("questions.id"), nullable=False)
+    response_id: Mapped[str] = mapped_column(ForeignKey("responses.id", ondelete="CASCADE"), index=True, nullable=False)
+    question_id: Mapped[str] = mapped_column(ForeignKey("questions.id", ondelete="CASCADE"), index=True, nullable=False)
     # raw answer value (string/number/bool/list depending on question type), stored as-is
     value: Mapped[Any] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
