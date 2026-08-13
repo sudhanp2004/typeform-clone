@@ -16,6 +16,7 @@ QuestionTypeLiteral = Literal[
 ]
 
 FormStatusLiteral = Literal["draft", "published"]
+FormModeLiteral = Literal["universal", "lead_qualification", "knowledge_quiz", "match_quiz"]
 
 
 # ---------- Question ----------
@@ -77,6 +78,7 @@ class FormUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
     status: FormStatusLiteral | None = None
+    form_mode: FormModeLiteral | None = None
     theme: dict[str, Any] | None = None
     welcome_screen: dict[str, Any] | None = None
     thank_you_screen: dict[str, Any] | None = None
@@ -103,6 +105,7 @@ class FormDetail(BaseModel):
     title: str
     description: str | None
     status: str
+    form_mode: str = "universal"
     theme: dict[str, Any]
     welcome_screen: dict[str, Any]
     thank_you_screen: dict[str, Any]
@@ -133,6 +136,7 @@ class PublicForm(BaseModel):
     id: str
     title: str
     description: str | None
+    form_mode: str = "universal"
     theme: dict[str, Any]
     welcome_screen: dict[str, Any]
     thank_you_screen: dict[str, Any]

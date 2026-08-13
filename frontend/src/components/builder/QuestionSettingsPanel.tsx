@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Question, QuestionOptions, QuestionType } from "@/lib/types";
+import type { Question, QuestionOptions, QuestionType, FormMode } from "@/lib/types";
 import { Toggle } from "@/components/ui/Toggle";
 import { QUESTION_TYPE_META, QUESTION_TYPE_ORDER } from "./questionTypes";
 import { BranchingEditor } from "./BranchingEditor";
@@ -9,6 +9,7 @@ import { BranchingEditor } from "./BranchingEditor";
 interface QuestionSettingsPanelProps {
   question: Question;
   allQuestions: Question[];
+  formMode: FormMode;
   onChangeType: (type: QuestionType) => void;
   onToggleRequired: () => void;
   onChangeOptions: (patch: Partial<QuestionOptions>) => void;
@@ -115,6 +116,7 @@ function toggleValidation(type: QuestionType, options: QuestionOptions): Partial
 export function QuestionSettingsPanel({
   question,
   allQuestions,
+  formMode,
   onChangeType,
   onToggleRequired,
   onChangeOptions,
@@ -286,6 +288,71 @@ export function QuestionSettingsPanel({
           </SettingRow>
         </div>
       </AccordionCard>
+
+      {/* ── Quiz cards ───────────────────────────────────── */}
+      {formMode === 'knowledge_quiz' && ["multiple_choice", "dropdown", "yes_no"].includes(question.type) && (
+        <AccordionCard title="Quiz" defaultOpen={true}>
+          <div className="pb-1">
+            <p className="mb-2 text-xs text-ink-soft">Select the correct answer</p>
+            {(question.options.choices ?? []).map((choice) => (
+              <button
+                key={choice}
+                onClick={() => onChangeOptions({ correct_answer: choice })}
+                className={`mb-1.5 flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
+                  question.options.correct_answer === choice
+                    ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
+                    : 'border-line text-ink hover:bg-paper-soft'
+                }`}
+              >
+                <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                  question.options.correct_answer === choice ? 'border-emerald-400 bg-emerald-400' : 'border-line'
+                }`}>
+                  {question.options.correct_answer === choice && (
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                      <path d="M1.5 4l2 2 3-3" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </span>
+                {choice}
+              </button>
+            ))}
+            {(!question.options.choices || question.options.choices.length === 0) && (
+              <p className="text-xs text-ink-soft/50">Add answer choices first</p>
+            )}
+          </div>
+        </AccordionCard>
+      )}
+
+      {formMode === 'lead_qualification' && ["multiple_choice", "dropdown", "yes_no"].includes(question.type) && (
+        <AccordionCard title="Scores" defaultOpen={true}>
+          <div className="pb-1">
+            <p className="mb-2 text-xs text-ink-soft">Assign a score to each answer</p>
+            {(question.options.choices ?? []).map((choice) => {
+              const scores = question.options.choice_scores ?? {};
+              return (
+                <div key={choice} className="mb-2 flex items-center gap-2">
+                  <span className="flex-1 truncate text-sm text-ink">{choice}</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={scores[choice] ?? 0}
+                    onChange={(e) => {
+                      const next = { ...scores, [choice]: Number(e.target.value) };
+                      onChangeOptions({ choice_scores: next });
+                    }}
+                    className="w-16 rounded-lg border border-line px-2 py-1 text-right text-sm text-ink focus:border-ink/40 focus:outline-none"
+                  />
+                  <span className="text-xs text-ink-soft">pts</span>
+                </div>
+              );
+            })}
+            {(!question.options.choices || question.options.choices.length === 0) && (
+              <p className="text-xs text-ink-soft/50">Add answer choices first</p>
+            )}
+          </div>
+        </AccordionCard>
+      )}
 
       {/* ── Image or video card ───────────────────────────── */}
       <AccordionCard

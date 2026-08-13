@@ -152,12 +152,31 @@ export function RespondentFlow({ form, onComplete, previewMode }: RespondentFlow
         )}
 
         {stage === "done" && (
-          <ThankYouScreen
-            key="done"
-            title={form.thank_you_screen.title || "Thanks for completing this form!"}
-            subtitle={form.thank_you_screen.subtitle}
-            accentColor={accentColor}
-          />
+          <div className="flex flex-1 flex-col items-center justify-center" key="done-container">
+            {form.form_mode === 'knowledge_quiz' && (
+              <div className="mb-8 flex flex-col items-center gap-2 rounded-2xl bg-white p-6 shadow-sm border border-line z-10">
+                <span className="text-sm font-semibold text-ink-soft">Your Score</span>
+                <span className="text-4xl font-bold text-ink" style={{ color: accentColor }}>
+                  {form.questions.reduce((acc, q) => (q.options.correct_answer && answers[q.id] === q.options.correct_answer ? acc + 1 : acc), 0)} / {form.questions.filter(q => q.options.correct_answer).length}
+                </span>
+              </div>
+            )}
+            {form.form_mode === 'lead_qualification' && (
+              <div className="mb-8 flex flex-col items-center gap-2 rounded-2xl bg-white p-6 shadow-sm border border-line z-10">
+                <span className="text-sm font-semibold text-ink-soft">Your Total</span>
+                <span className="text-4xl font-bold text-ink" style={{ color: accentColor }}>
+                  {form.questions.reduce((acc, q) => acc + (q.options.choice_scores?.[answers[q.id] as string] ?? 0), 0)} pts
+                </span>
+              </div>
+            )}
+            <div className="absolute inset-0">
+              <ThankYouScreen
+                title={form.thank_you_screen.title || "Thanks for completing this form!"}
+                subtitle={form.thank_you_screen.subtitle}
+                accentColor={accentColor}
+              />
+            </div>
+          </div>
         )}
       </AnimatePresence>
 

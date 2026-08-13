@@ -53,6 +53,7 @@ class Form(Base):
     title: Mapped[str] = mapped_column(String, nullable=False, default="Untitled form")
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String, nullable=False, default=FormStatus.draft.value)
+    form_mode: Mapped[str] = mapped_column(String, nullable=False, default="universal")
     theme: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     welcome_screen: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     thank_you_screen: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)

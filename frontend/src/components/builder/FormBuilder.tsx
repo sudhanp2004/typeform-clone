@@ -249,6 +249,13 @@ export function FormBuilder({ formId }: { formId: string }) {
       {activeTab === "content" && (
         <div className="flex flex-1 flex-col overflow-hidden">
           <BuilderToolbar
+            formMode={form.form_mode ?? "universal"}
+            onModeChange={(mode) => {
+              setForm((f) => (f ? { ...f, form_mode: mode } : f));
+              updateForm(formId, { form_mode: mode }).catch(() => {
+                showToast("Couldn't save form mode", "error");
+              });
+            }}
             onAddClick={() => setAddPickerOpen(true)}
             onPreviewClick={() => setPreviewOpen(true)}
             onDesignClick={() => setDesignOpen(true)}
@@ -313,6 +320,7 @@ export function FormBuilder({ formId }: { formId: string }) {
                 <QuestionSettingsPanel
                   question={selectedQuestion}
                   allQuestions={form.questions}
+                  formMode={form.form_mode ?? "universal"}
                   onChangeType={(type) =>
                     handleUpdateQuestion(selectedQuestion.id, { type, options: defaultOptionsForType(type) })
                   }
@@ -370,6 +378,7 @@ export function FormBuilder({ formId }: { formId: string }) {
               id: form.id,
               title: form.title,
               description: form.description,
+              form_mode: form.form_mode ?? "universal",
               theme: form.theme,
               welcome_screen: form.welcome_screen,
               thank_you_screen: form.thank_you_screen,

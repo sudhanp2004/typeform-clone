@@ -11,6 +11,8 @@ export type QuestionType =
 
 export type FormStatus = "draft" | "published";
 
+export type FormMode = "universal" | "lead_qualification" | "knowledge_quiz" | "match_quiz";
+
 export interface QuestionOptions {
   choices?: string[];
   max_rating?: number;
@@ -19,6 +21,9 @@ export interface QuestionOptions {
   answer_format?: "letters" | "numbers" | "alphanumeric" | null;
   min_value?: number | null;
   max_value?: number | null;
+  // Quiz fields
+  correct_answer?: string;
+  choice_scores?: Record<string, number>;
 }
 
 export interface BranchingRule {
@@ -75,6 +80,7 @@ export interface FormDetail {
   title: string;
   description: string | null;
   status: FormStatus;
+  form_mode: FormMode;
   theme: FormTheme;
   welcome_screen: ScreenContent;
   thank_you_screen: ScreenContent;
@@ -88,6 +94,7 @@ export interface PublicForm {
   id: string;
   title: string;
   description: string | null;
+  form_mode: FormMode;
   theme: FormTheme;
   welcome_screen: ScreenContent;
   thank_you_screen: ScreenContent;
