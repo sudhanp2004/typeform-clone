@@ -202,11 +202,31 @@ Full interactive reference at `/docs` once the backend is running. Summary:
 - **Placeholders shown as "Coming soon"**: Payment and File upload question types (visible,
   disabled, in the type picker), integrations/webhooks, and team collaboration — all
   explicitly out of scope per the assignment.
-- **Bonus features implemented**: logic jumps / conditional branching (see below), CSV
-  export, partial-response/completion-rate tracking, per-form accent color theming (used
-  live in both the builder canvas and the respondent flow). Dark mode and the file-upload
-  question type were left out to keep the core builder/respondent flow (the two pieces the
-  assignment weights most) polished rather than spreading effort thin.
+- **Bonus features implemented**: logic jumps / conditional branching, custom themes (see
+  below for both), CSV export, partial-response/completion-rate tracking. Dark mode and the
+  file-upload question type were left out to keep the core builder/respondent flow (the two
+  pieces the assignment weights most) polished rather than spreading effort thin.
+
+### Custom themes (colors, fonts, background)
+
+Opened from the "Design" button in the builder toolbar. Three per-form settings, all
+persisted on `Form.theme` (a JSON dict — `accent_color`, `background`, `font`) and applied
+live everywhere a respondent (or the creator, while editing) actually sees the form:
+
+- **Accent color** — used for the progress bar, required-field asterisk, selected-choice
+  borders, and primary buttons (Start / OK / rating cells) throughout the respondent flow.
+- **Background color** — a curated set of light/neutral presets, plus a native color picker
+  for any custom value. Kept to light colors by default because the respondent flow's text
+  color is fixed (not yet part of the theme system) — a very dark custom background is
+  technically possible via the picker but is the creator's own call, the same tradeoff real
+  Typeform makes.
+- **Font** — a curated set of 5 typefaces (Inter, Poppins, Lora, Playfair Display, JetBrains
+  Mono), each loaded at build time via `next/font/google` rather than fetched at runtime, so
+  picking one never causes a flash of unstyled text or an extra network request per visitor.
+
+Applied in three places: the public respondent page (`/f/[id]`), the builder's own
+"Preview" overlay, and the builder's live-editing canvas itself — so a creator sees the
+real theme while building, not just when previewing.
 
 ### Logic jumps / conditional branching
 

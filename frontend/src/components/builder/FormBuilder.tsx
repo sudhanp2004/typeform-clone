@@ -10,7 +10,7 @@ import {
   updateQuestion,
   type QuestionInput,
 } from "@/lib/api";
-import type { FormDetail, Question, QuestionType, ScreenContent } from "@/lib/types";
+import type { FormDetail, FormTheme, Question, QuestionType, ScreenContent } from "@/lib/types";
 import { useToast } from "@/components/ui/Toast";
 import { RespondentFlow } from "@/components/respondent/RespondentFlow";
 import { BuilderHeader, type BuilderTab } from "./BuilderHeader";
@@ -24,6 +24,7 @@ import { WorkflowPanel } from "./WorkflowPanel";
 import { ScreenEditor } from "./ScreenEditor";
 import { WelcomeScreenRow } from "./WelcomeScreenRow";
 import { EndingsSection } from "./EndingsSection";
+import { DesignPanel } from "./DesignPanel";
 import { defaultOptionsForType } from "./questionTypes";
 
 type Selection = { kind: "question"; id: string } | { kind: "welcome" } | { kind: "ending" };
@@ -34,6 +35,7 @@ export function FormBuilder({ formId }: { formId: string }) {
   const [activeTab, setActiveTab] = useState<BuilderTab>("content");
   const [addPickerOpen, setAddPickerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [designOpen, setDesignOpen] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -179,6 +181,16 @@ export function FormBuilder({ formId }: { formId: string }) {
     }
   };
 
+  const handleUpdateTheme = async (patch: Partial<FormTheme>) => {
+    const nextTheme = { ...form.theme, ...patch };
+    setForm((f) => (f ? { ...f, theme: nextTheme } : f));
+    try {
+      await updateForm(formId, { theme: nextTheme });
+    } catch {
+      showToast("Couldn't save the theme", "error");
+    }
+  };
+
   return (
     <div className="flex h-screen flex-col">
       <BuilderHeader
@@ -194,7 +206,11 @@ export function FormBuilder({ formId }: { formId: string }) {
 
       {activeTab === "content" && (
         <div className="flex flex-1 flex-col overflow-hidden">
-          <BuilderToolbar onAddClick={() => setAddPickerOpen(true)} onPreviewClick={() => setPreviewOpen(true)} />
+          <BuilderToolbar
+            onAddClick={() => setAddPickerOpen(true)}
+            onPreviewClick={() => setPreviewOpen(true)}
+            onDesignClick={() => setDesignOpen(true)}
+          />
 
           <div className="flex flex-1 overflow-hidden">
             <div className="flex w-72 shrink-0 flex-col border-r border-line">
@@ -219,7 +235,7 @@ export function FormBuilder({ formId }: { formId: string }) {
               />
             </div>
 
-            <div className="flex-1 overflow-y-auto bg-white">
+            <div className="flex flex-1 flex-col overflow-y-auto bg-white">
               {selection?.kind === "welcome" && (
                 <ScreenEditor key="welcome" kind="welcome" screen={form.welcome_screen} onUpdate={handleUpdateWelcome} />
               )}
@@ -231,6 +247,8 @@ export function FormBuilder({ formId }: { formId: string }) {
                   key={selectedQuestion.id}
                   question={selectedQuestion}
                   accentColor={accentColor}
+                  background={form.theme.background}
+                  font={form.theme.font}
                   onUpdate={(patch) => handleUpdateQuestion(selectedQuestion.id, patch)}
                 />
               )}
@@ -281,6 +299,13 @@ export function FormBuilder({ formId }: { formId: string }) {
       )}
 
       <QuestionTypePicker open={addPickerOpen} onClose={() => setAddPickerOpen(false)} onPick={handleAddQuestion} />
+
+      <DesignPanel
+        open={designOpen}
+        onClose={() => setDesignOpen(false)}
+        theme={form.theme}
+        onUpdate={handleUpdateTheme}
+      />
 
       {previewOpen && (
         <div className="fixed inset-0 z-50 bg-paper">

@@ -3,6 +3,7 @@
 interface BuilderToolbarProps {
   onAddClick: () => void;
   onPreviewClick: () => void;
+  onDesignClick: () => void;
 }
 
 const UTILITY_ICONS: { glyph: string; label: string }[] = [
@@ -14,7 +15,7 @@ const UTILITY_ICONS: { glyph: string; label: string }[] = [
   { glyph: "⚙", label: "Settings" },
 ];
 
-export function BuilderToolbar({ onAddClick, onPreviewClick }: BuilderToolbarProps) {
+export function BuilderToolbar({ onAddClick, onPreviewClick, onDesignClick }: BuilderToolbarProps) {
   return (
     <div className="flex shrink-0 items-center gap-3 border-b border-line bg-paper-soft/60 px-4 py-2.5">
       <button
@@ -38,7 +39,10 @@ export function BuilderToolbar({ onAddClick, onPreviewClick }: BuilderToolbarPro
           + Add content
         </button>
 
-        <button className="ml-1 flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-ink-soft hover:bg-paper-soft hover:text-ink">
+        <button
+          onClick={onDesignClick}
+          className="ml-1 flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-ink-soft hover:bg-paper-soft hover:text-ink"
+        >
           <span aria-hidden className="h-3.5 w-3.5 rounded-full bg-gradient-to-br from-rose-300 via-amber-300 to-sky-400" />
           Design
         </button>

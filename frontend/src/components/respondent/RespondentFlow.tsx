@@ -4,6 +4,7 @@ import { AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import type { PublicForm } from "@/lib/types";
 import { resolveNextQuestion } from "@/lib/branching";
+import { resolveFontFamily } from "@/lib/fonts";
 import { ProgressBar } from "./ProgressBar";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { QuestionScreen } from "./QuestionScreen";
@@ -100,7 +101,13 @@ export function RespondentFlow({ form, onComplete, previewMode }: RespondentFlow
   }
 
   return (
-    <div className="relative flex min-h-screen flex-1 flex-col bg-paper">
+    <div
+      className="relative flex min-h-screen flex-1 flex-col bg-paper"
+      style={{
+        backgroundColor: form.theme.background || undefined,
+        fontFamily: resolveFontFamily(form.theme.font),
+      }}
+    >
       {stage === "question" && question && (
         <ProgressBar progress={(question.order_index + 1) / form.questions.length} accentColor={accentColor} />
       )}

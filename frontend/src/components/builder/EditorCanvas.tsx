@@ -6,20 +6,26 @@ import { Textarea } from "@/components/ui/Input";
 import { ChoicesEditor } from "./ChoicesEditor";
 import { QUESTION_TYPE_META } from "./questionTypes";
 import type { QuestionInput } from "@/lib/api";
+import { resolveFontFamily } from "@/lib/fonts";
 
 interface EditorCanvasProps {
   question: Question;
   accentColor: string;
+  background?: string;
+  font?: string;
   onUpdate: (patch: Partial<QuestionInput>) => void;
 }
 
-export function EditorCanvas({ question, accentColor, onUpdate }: EditorCanvasProps) {
+export function EditorCanvas({ question, accentColor, background, font, onUpdate }: EditorCanvasProps) {
   const [title, setTitle] = useState(question.title);
   const [description, setDescription] = useState(question.description ?? "");
   const meta = QUESTION_TYPE_META[question.type];
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-8 py-16">
+    <div
+      className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-8 py-16"
+      style={{ backgroundColor: background || undefined, fontFamily: resolveFontFamily(font) }}
+    >
       <div className="mb-5 flex h-6 w-6 items-center justify-center rounded bg-ink text-xs font-bold text-white">
         {meta.icon}
       </div>
