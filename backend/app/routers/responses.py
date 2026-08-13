@@ -1,5 +1,6 @@
 import csv
 import io
+import re
 from collections import Counter
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -59,6 +60,15 @@ def _is_number(value) -> bool:
         return False
 
 
+def _safe_filename(title: str) -> str:
+    # Content-Disposition filenames must be latin-1 encodable — an em dash or any other
+    # non-ASCII character in a form title (e.g. "Frontend Engineer — Application") would
+    # otherwise crash the response entirely, not just render oddly.
+    ascii_title = title.encode("ascii", "ignore").decode("ascii")
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", ascii_title).strip("-")
+    return slug or "form"
+
+
 @router.get("/export")
 def export_responses_csv(db: Session = Depends(get_db), form: models.Form = Depends(get_owned_form)):
     # Registered before /{response_id} so "export" is never swallowed as a response id.
@@ -77,7 +87,7 @@ def export_responses_csv(db: Session = Depends(get_db), form: models.Form = Depe
         writer.writerow(row)
 
     buffer.seek(0)
-    filename = f"{form.title or 'form'}-responses.csv".replace(" ", "-")
+    filename = f"{_safe_filename(form.title or '')}-responses.csv"
     return StreamingResponse(
         iter([buffer.getvalue()]),
         media_type="text/csv",
