@@ -114,8 +114,8 @@ function SortableQuestionItem({
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`group relative flex items-center gap-2 rounded-lg border px-2.5 py-2 text-sm ${
-        selected ? "border-ink bg-white shadow-sm" : "border-transparent hover:bg-white/70"
+      className={`group relative flex items-center gap-2 rounded-xl px-2.5 py-2 text-sm transition-colors ${
+        selected ? "bg-white shadow-[0_1px_3px_rgba(0,0,0,0.05)] ring-1 ring-ink/5" : "hover:bg-white/50"
       } ${isDragging ? "z-10 opacity-70" : ""}`}
     >
       <button

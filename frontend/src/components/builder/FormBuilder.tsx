@@ -285,7 +285,7 @@ export function FormBuilder({ formId }: { formId: string }) {
               />
             </div>
 
-            <div className="flex flex-1 flex-col overflow-y-auto bg-white">
+            <div className="flex flex-1 flex-col overflow-y-auto bg-[#f3f3f5]">
               {selection?.kind === "welcome" && (
                 <ScreenEditor key="welcome" kind="welcome" screen={form.welcome_screen} onUpdate={handleUpdateWelcome} />
               )}

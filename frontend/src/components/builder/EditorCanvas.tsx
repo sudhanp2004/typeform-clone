@@ -22,10 +22,11 @@ export function EditorCanvas({ question, accentColor, background, font, onUpdate
   const meta = QUESTION_TYPE_META[question.type];
 
   return (
-    <div
-      className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-8 py-16"
-      style={{ backgroundColor: background || undefined, fontFamily: resolveFontFamily(font) }}
-    >
+    <div className="flex w-full flex-1 flex-col items-center justify-center p-4 sm:p-8">
+      <div
+        className="flex w-full max-w-3xl flex-col justify-center rounded-2xl bg-white px-8 py-16 shadow-[0_2px_12px_rgba(0,0,0,0.04)] sm:px-12"
+        style={{ backgroundColor: background || undefined, fontFamily: resolveFontFamily(font) }}
+      >
       <div className="mb-5 flex h-6 w-6 items-center justify-center rounded bg-ink text-xs font-bold text-white">
         {meta.icon}
       </div>
@@ -114,6 +115,7 @@ export function EditorCanvas({ question, accentColor, background, font, onUpdate
             <span className="text-xs">Max 10 MB</span>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

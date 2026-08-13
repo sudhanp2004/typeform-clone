@@ -29,8 +29,8 @@ export function WelcomeScreenRow({
     <div className="border-t border-line bg-paper-soft/60 p-3">
       <button
         onClick={onSelect}
-        className={`flex w-full items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-sm ${
-          selected ? "border-ink bg-white shadow-sm" : "border-transparent hover:bg-white/70"
+        className={`flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${
+          selected ? "bg-white shadow-[0_1px_3px_rgba(0,0,0,0.05)] ring-1 ring-ink/5" : "hover:bg-white/50"
         }`}
       >
         <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-ink text-[10px] font-bold text-white">

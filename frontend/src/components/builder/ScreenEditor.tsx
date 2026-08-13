@@ -29,7 +29,8 @@ export function ScreenEditor({ kind, screen, onUpdate }: ScreenEditorProps) {
   // ── Redirect ending view ──────────────────────────────────────────────────
   if (isRedirect) {
     return (
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-8 py-16">
+      <div className="flex w-full flex-1 flex-col items-center justify-center p-4 sm:p-8">
+        <div className="flex w-full max-w-3xl flex-col justify-center rounded-2xl bg-white px-8 py-16 shadow-[0_2px_12px_rgba(0,0,0,0.04)] sm:px-12">
         <div className="mb-5 flex h-6 w-6 items-center justify-center rounded bg-blue-500 text-xs font-bold text-white">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M2 6h8M6 2l4 4-4 4" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -69,13 +70,15 @@ export function ScreenEditor({ kind, screen, onUpdate }: ScreenEditorProps) {
             Open URL
           </a>
         )}
+        </div>
       </div>
     );
   }
 
   // ── Default screen view ───────────────────────────────────────────────────
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-8 py-16">
+    <div className="flex w-full flex-1 flex-col items-center justify-center p-4 sm:p-8">
+      <div className="flex w-full max-w-3xl flex-col justify-center rounded-2xl bg-white px-8 py-16 shadow-[0_2px_12px_rgba(0,0,0,0.04)] sm:px-12">
       <div className="mb-5 flex h-6 w-6 items-center justify-center rounded bg-ink text-xs font-bold text-white">
         {meta.icon}
       </div>
@@ -98,6 +101,7 @@ export function ScreenEditor({ kind, screen, onUpdate }: ScreenEditorProps) {
         rows={1}
         className="mt-3 !border-0 !px-0 !py-1 text-base italic text-ink-soft !shadow-none"
       />
+      </div>
     </div>
   );
 }
