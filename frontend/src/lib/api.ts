@@ -1,4 +1,5 @@
 import type {
+  FileAnswer,
   FormDetail,
   FormListItem,
   PublicForm,
@@ -110,3 +111,21 @@ export const submitPublicResponse = (
     method: "PATCH",
     body: JSON.stringify({ answers, is_complete: isComplete }),
   });
+
+export async function uploadPublicFile(formId: string, questionId: string, file: File): Promise<FileAnswer> {
+  const body = new FormData();
+  body.append("question_id", questionId);
+  body.append("file", file);
+
+  // Not routed through request(): that helper always sets Content-Type: application/json,
+  // which would strip the multipart boundary the browser needs to set itself for FormData.
+  const res = await fetch(`${API_URL}/api/public/forms/${formId}/uploads`, { method: "POST", body });
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new ApiError(errorBody.detail ?? "Upload failed", res.status);
+  }
+  return res.json() as Promise<FileAnswer>;
+}
+
+/** The upload endpoint returns a relative path (e.g. "/uploads/xyz.png"); resolve it against the API origin to link to it from the frontend. */
+export const resolveFileUrl = (relativeUrl: string) => `${API_URL}${relativeUrl}`;

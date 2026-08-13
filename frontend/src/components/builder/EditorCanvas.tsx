@@ -103,6 +103,14 @@ export function EditorCanvas({ question, accentColor, background, font, onUpdate
             ))}
           </div>
         )}
+
+        {question.type === "file_upload" && (
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-ink/15 px-4 py-8 text-center text-ink/40">
+            <span className="text-2xl">⇧</span>
+            <span className="text-sm font-medium">Click to upload a file</span>
+            <span className="text-xs">Max 10 MB</span>
+          </div>
+        )}
       </div>
     </div>
   );

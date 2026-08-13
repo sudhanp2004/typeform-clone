@@ -3,7 +3,7 @@ import io
 import re
 from collections import Counter
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -69,13 +69,24 @@ def _safe_filename(title: str) -> str:
     return slug or "form"
 
 
+def _csv_cell(value, question_type: str, base_url: str) -> str:
+    if value is None or value == "":
+        return ""
+    if question_type == "file_upload" and isinstance(value, dict):
+        url = value.get("url", "")
+        absolute_url = f"{base_url.rstrip('/')}{url}" if url.startswith("/") else url
+        return f"{value.get('file_name', 'file')} ({absolute_url})"
+    return str(value)
+
+
 @router.get("/export")
-def export_responses_csv(db: Session = Depends(get_db), form: models.Form = Depends(get_owned_form)):
+def export_responses_csv(request: Request, db: Session = Depends(get_db), form: models.Form = Depends(get_owned_form)):
     # Registered before /{response_id} so "export" is never swallowed as a response id.
     buffer = io.StringIO()
     writer = csv.writer(buffer)
 
     questions = form.questions
+    base_url = str(request.base_url)
     writer.writerow(["response_id", "submitted_at", "is_complete"] + [q.title or q.id for q in questions])
 
     for response in sorted(form.responses, key=lambda r: r.started_at):
@@ -83,7 +94,7 @@ def export_responses_csv(db: Session = Depends(get_db), form: models.Form = Depe
         row = [response.id, response.submitted_at or "", response.is_complete]
         for q in questions:
             value = answers_by_question.get(q.id)
-            row.append(value if value is not None else "")
+            row.append(_csv_cell(value, q.type, base_url))
         writer.writerow(row)
 
     buffer.seek(0)

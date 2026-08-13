@@ -1,6 +1,8 @@
 "use client";
 
-import type { Question } from "@/lib/types";
+import { useState } from "react";
+import type { FileAnswer, Question } from "@/lib/types";
+import { isFileAnswer } from "@/lib/types";
 
 interface AnswerFieldProps {
   question: Question;
@@ -9,9 +11,18 @@ interface AnswerFieldProps {
   onSubmitKey: () => void;
   accentColor: string;
   autoFocus?: boolean;
+  onUploadFile?: (file: File) => Promise<FileAnswer>;
 }
 
-export function AnswerField({ question, value, onChange, onSubmitKey, accentColor, autoFocus }: AnswerFieldProps) {
+export function AnswerField({
+  question,
+  value,
+  onChange,
+  onSubmitKey,
+  accentColor,
+  autoFocus,
+  onUploadFile,
+}: AnswerFieldProps) {
   const handleEnter = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -136,7 +147,107 @@ export function AnswerField({ question, value, onChange, onSubmitKey, accentColo
       );
     }
 
+    case "file_upload":
+      return (
+        <FileUploadField
+          value={isFileAnswer(value) ? value : null}
+          onChange={onChange}
+          onUploadFile={onUploadFile}
+          accentColor={accentColor}
+        />
+      );
+
     default:
       return null;
   }
+}
+
+const MAX_FILE_SIZE_LABEL = "10 MB";
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function FileUploadField({
+  value,
+  onChange,
+  onUploadFile,
+  accentColor,
+}: {
+  value: FileAnswer | null;
+  onChange: (value: unknown) => void;
+  onUploadFile?: (file: File) => Promise<FileAnswer>;
+  accentColor: string;
+}) {
+  const [status, setStatus] = useState<"idle" | "uploading" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleFile = async (file: File | undefined) => {
+    if (!file || !onUploadFile) return;
+    setStatus("uploading");
+    setErrorMessage(null);
+    try {
+      const uploaded = await onUploadFile(file);
+      onChange(uploaded);
+      setStatus("idle");
+    } catch (err) {
+      setStatus("error");
+      setErrorMessage(err instanceof Error ? err.message : "Upload failed");
+    }
+  };
+
+  if (value) {
+    return (
+      <div
+        className="flex items-center justify-between gap-3 rounded-xl border-2 px-4 py-3.5"
+        style={{ borderColor: accentColor, backgroundColor: `${accentColor}0f` }}
+      >
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sm text-white"
+            style={{ backgroundColor: accentColor }}
+          >
+            ✓
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-ink">{value.file_name}</p>
+            <p className="text-xs text-ink-soft">{formatFileSize(value.size)}</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onChange(null)}
+          className="shrink-0 text-xs font-semibold text-ink-soft underline hover:text-ink"
+        >
+          Remove
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <label
+        className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors ${
+          status === "uploading" ? "pointer-events-none opacity-60" : "hover:border-ink/30"
+        }`}
+        style={{ borderColor: "rgba(10,10,10,0.15)" }}
+      >
+        <span className="text-2xl">{status === "uploading" ? "⋯" : "⇧"}</span>
+        <span className="text-sm font-medium text-ink">
+          {status === "uploading" ? "Uploading…" : "Click to upload a file"}
+        </span>
+        <span className="text-xs text-ink-soft">Max {MAX_FILE_SIZE_LABEL}</span>
+        <input
+          type="file"
+          className="sr-only"
+          disabled={status === "uploading"}
+          onChange={(e) => handleFile(e.target.files?.[0])}
+        />
+      </label>
+      {status === "error" && <p className="mt-2 text-sm font-medium text-danger">{errorMessage}</p>}
+    </div>
+  );
 }

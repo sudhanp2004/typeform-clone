@@ -140,7 +140,7 @@ forms
 questions
 ├─ id (PK)
 ├─ form_id (FK → forms.id)
-├─ type (short_text | long_text | multiple_choice | dropdown | email | number | yes_no | rating)
+├─ type (short_text | long_text | multiple_choice | dropdown | email | number | yes_no | rating | file_upload)
 ├─ title, description
 ├─ required (bool)
 ├─ order_index (int)
@@ -201,18 +201,20 @@ Full interactive reference at `/docs` once the backend is running. Summary:
 | GET | `/api/public/forms/{id}` | Published form + questions (404 if draft/missing) |
 | POST | `/api/public/forms/{id}/responses` | Start a response (creates the partial-tracking row) |
 | PATCH | `/api/public/forms/{id}/responses/{rid}` | Submit answers; validates required/email/number/choice/rating server-side |
+| POST | `/api/public/forms/{id}/uploads` | Upload a file for a `file_upload` question (multipart) |
 
 ## Assumptions & placeholders
 
 - **Auth**: no login flow. The app always acts as one default creator, per the spec's
   "real creator authentication may be simplified" note.
-- **Placeholders shown as "Coming soon"**: Payment and File upload question types (visible,
-  disabled, in the type picker), integrations/webhooks, and team collaboration — all
-  explicitly out of scope per the assignment.
-- **Bonus features implemented**: logic jumps / conditional branching, custom themes (see
-  below for both), CSV export, partial-response/completion-rate tracking. Dark mode and the
-  file-upload question type were left out to keep the core builder/respondent flow (the two
-  pieces the assignment weights most) polished rather than spreading effort thin.
+- **Placeholders shown as "Coming soon"**: the Payment question type (visible, disabled, in
+  the type picker), integrations/webhooks, and team collaboration — all explicitly out of
+  scope per the assignment.
+- **Bonus features implemented**: logic jumps / conditional branching, custom themes, CSV
+  export, partial-response/completion-rate tracking, and the file-upload question type (see
+  below for details on each). Dark mode was left out to keep the core builder/respondent
+  flow (the two pieces the assignment weights most) polished rather than spreading effort
+  thin.
 
 ### Custom themes (colors, fonts, background)
 
@@ -260,6 +262,31 @@ lives in the per-question settings panel described above.
   forms (a customer feedback survey and a job application, covering all 8 question types
   between them) with several pre-existing responses each, plus 1 draft form — so the app is
   immediately explorable without manually building a form first.
+
+### File-upload question type
+
+Respondents can attach a real file to a `file_upload` question — not a mock widget. Files
+are sent as `multipart/form-data` (bypassing the frontend's default JSON request helper,
+since a `FormData` body needs the browser to set its own boundary) to
+`POST /api/public/forms/{id}/uploads`, which:
+- validates the target form is published and the question is really type `file_upload`,
+- rejects extensions outside a fixed allowlist and streams the upload in 1MB chunks so a
+  10MB cap is enforced without buffering the whole file in memory first,
+- saves it to `backend/uploads/` under a random filename (the original filename is kept only
+  as display metadata, never used as the path on disk), and
+- returns `{file_name, url, size}`, which becomes the question's answer value — stored as
+  JSON in `answers.value` like any other answer, so no schema change was needed to support it.
+
+Uploaded files are served back via a `StaticFiles` mount at `/uploads`, linked from both the
+results page's response detail modal and the CSV export (as `name (url)`). In the builder's
+Preview overlay — which can run against an unpublished draft, where the real endpoint would
+reject the upload — file selection is faked locally with `URL.createObjectURL` instead of
+hitting the network, consistent with the "Preview mode — responses aren't saved" messaging
+already shown there.
+
+Same durability caveat as the SQLite database (see Deployment below): Render's free tier has
+no persistent disk, so `backend/uploads/` is wiped on every redeploy/cold start. Accepted as
+a demo-scale tradeoff rather than solved with an external object store.
 
 ## Deployment
 

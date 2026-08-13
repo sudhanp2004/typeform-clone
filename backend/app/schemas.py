@@ -12,6 +12,7 @@ QuestionTypeLiteral = Literal[
     "number",
     "yes_no",
     "rating",
+    "file_upload",
 ]
 
 FormStatusLiteral = Literal["draft", "published"]

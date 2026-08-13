@@ -9,6 +9,7 @@ export const QUESTION_TYPE_META: Record<QuestionType, { label: string; icon: str
   number: { label: "Number", icon: "#", defaultTitle: "Untitled number question" },
   yes_no: { label: "Yes / No", icon: "✓", defaultTitle: "Untitled yes/no question" },
   rating: { label: "Rating", icon: "★", defaultTitle: "How would you rate this?" },
+  file_upload: { label: "File upload", icon: "⇧", defaultTitle: "Upload a file" },
 };
 
 export const QUESTION_TYPE_ORDER: QuestionType[] = [
@@ -20,6 +21,7 @@ export const QUESTION_TYPE_ORDER: QuestionType[] = [
   "rating",
   "email",
   "number",
+  "file_upload",
 ];
 
 export function defaultOptionsForType(type: QuestionType): Question["options"] {

@@ -1,10 +1,11 @@
 "use client";
 
 import { AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import type { PublicForm } from "@/lib/types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { FileAnswer, PublicForm } from "@/lib/types";
 import { resolveNextQuestion } from "@/lib/branching";
 import { resolveFontFamily } from "@/lib/fonts";
+import { uploadPublicFile } from "@/lib/api";
 import { ProgressBar } from "./ProgressBar";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { QuestionScreen } from "./QuestionScreen";
@@ -49,6 +50,19 @@ export function RespondentFlow({ form, onComplete, previewMode }: RespondentFlow
       return next;
     });
   };
+
+  // The real upload endpoint requires the form to be published, but Preview can be
+  // opened on an unpublished draft — so in preview mode we fake the round trip
+  // locally with an object URL instead of hitting the network.
+  const handleUploadFile = useCallback(
+    async (file: File): Promise<FileAnswer> => {
+      if (previewMode || !question) {
+        return { file_name: file.name, url: URL.createObjectURL(file), size: file.size };
+      }
+      return uploadPublicFile(form.id, question.id, file);
+    },
+    [previewMode, form.id, question]
+  );
 
   const goNext = async () => {
     const current = form.questions.find((q) => q.id === currentIdRef.current);
@@ -133,6 +147,7 @@ export function RespondentFlow({ form, onComplete, previewMode }: RespondentFlow
             onChange={(v) => setAnswer(question.id, v)}
             onAdvance={goNext}
             accentColor={accentColor}
+            onUploadFile={handleUploadFile}
           />
         )}
 

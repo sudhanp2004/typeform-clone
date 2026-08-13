@@ -4,7 +4,7 @@ import type { QuestionType } from "@/lib/types";
 import { Modal } from "@/components/ui/Modal";
 import { QUESTION_TYPE_META, QUESTION_TYPE_ORDER } from "./questionTypes";
 
-const COMING_SOON = ["Payment", "File upload"];
+const COMING_SOON = ["Payment"];
 
 export function QuestionTypePicker({
   open,

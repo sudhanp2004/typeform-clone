@@ -6,7 +6,8 @@ export type QuestionType =
   | "email"
   | "number"
   | "yes_no"
-  | "rating";
+  | "rating"
+  | "file_upload";
 
 export type FormStatus = "draft" | "published";
 
@@ -97,6 +98,23 @@ export interface Answer {
   value: unknown;
 }
 
+/** Shape of an answer value for a file_upload question, returned by the upload endpoint. */
+export interface FileAnswer {
+  file_name: string;
+  url: string;
+  size: number;
+}
+
+export function isFileAnswer(value: unknown): value is FileAnswer {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "url" in value &&
+    "file_name" in value &&
+    typeof (value as FileAnswer).url === "string"
+  );
+}
+
 export interface ResponseDetail {
   id: string;
   is_complete: boolean;
@@ -123,4 +141,5 @@ export const QUESTION_TYPE_LABELS: Record<QuestionType, string> = {
   number: "Number",
   yes_no: "Yes / No",
   rating: "Rating",
+  file_upload: "File upload",
 };

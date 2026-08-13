@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import type { Question, QuestionType } from "@/lib/types";
+import type { FileAnswer, Question, QuestionType } from "@/lib/types";
 import { AnswerField } from "./AnswerField";
 import { validateAnswer } from "@/lib/validation";
 
@@ -13,6 +13,7 @@ interface QuestionScreenProps {
   onChange: (value: unknown) => void;
   onAdvance: () => void;
   accentColor: string;
+  onUploadFile?: (file: File) => Promise<FileAnswer>;
 }
 
 const variants = {
@@ -25,7 +26,7 @@ const variants = {
 // the real Typeform — we auto-advance instead of waiting for an explicit OK.
 const AUTO_ADVANCE_TYPES = new Set<QuestionType>(["multiple_choice", "dropdown", "yes_no", "rating"]);
 
-export function QuestionScreen({ question, index, value, onChange, onAdvance, accentColor }: QuestionScreenProps) {
+export function QuestionScreen({ question, index, value, onChange, onAdvance, accentColor, onUploadFile }: QuestionScreenProps) {
   const [error, setError] = useState<string | null>(null);
   const isSelectable = AUTO_ADVANCE_TYPES.has(question.type);
 
@@ -85,6 +86,7 @@ export function QuestionScreen({ question, index, value, onChange, onAdvance, ac
           onSubmitKey={handleAdvance}
           accentColor={accentColor}
           autoFocus
+          onUploadFile={onUploadFile}
         />
 
         {error && <p className="mt-3 text-sm font-medium text-danger">{error}</p>}

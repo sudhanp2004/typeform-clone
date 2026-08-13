@@ -26,6 +26,7 @@ class QuestionType(str, enum.Enum):
     number = "number"
     yes_no = "yes_no"
     rating = "rating"
+    file_upload = "file_upload"
 
 
 class FormStatus(str, enum.Enum):
