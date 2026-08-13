@@ -215,9 +215,16 @@ Full interactive reference at `/docs` once the backend is running. Summary:
 
 - **Backend → Render.** A `render.yaml` blueprint is included at the repo root: on Render,
   New → Blueprint → select this repo, and it configures the web service (build/start commands,
-  a persistent disk mounted at `backend/data` so `typeform.db` survives restarts, and the
-  `DATABASE_PATH` env var) automatically. After deploying, set the `FRONTEND_ORIGIN` env var
-  to the deployed Vercel URL (comma-separate multiple origins if needed) and redeploy.
+  health check) automatically. After deploying, set the `FRONTEND_ORIGIN` env var to the
+  deployed Vercel URL (comma-separate multiple origins if needed) and redeploy.
+
+  Note: Render's free plan doesn't support persistent disks, so `typeform.db` lives on the
+  instance's ephemeral filesystem — it survives while the instance is running but resets on
+  redeploy or after the free instance spins down from inactivity. The app reseeds itself
+  automatically on an empty database, so it's always immediately usable after a cold start;
+  the tradeoff is that responses submitted between cold starts aren't durable on the free
+  tier. A paid Starter-plan instance (which supports Render's persistent disks) would fix
+  this if durable storage is needed beyond a demo.
 - **Frontend → Vercel.** Import this repo, set the project root to `frontend/`, and set
   `NEXT_PUBLIC_API_URL` to the deployed Render backend URL.
 
