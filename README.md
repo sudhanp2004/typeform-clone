@@ -4,6 +4,12 @@ A functional clone of Typeform: a drag-and-drop form builder, a full-screen anim
 one-question-at-a-time respondent experience, and a results dashboard with per-question
 summary stats. Built for the SDE Fullstack take-home assignment.
 
+> **⚠️ EVALUATOR NOTICE: Ephemeral Database (404 Errors)**
+> As per the assignment requirements, this project uses **SQLite**. It is currently hosted on **Render's Free Tier**. 
+> Render's free servers spin down after 15 minutes of inactivity, which **wipes the local filesystem (including the SQLite database file)**. 
+> 
+> When the server wakes back up, it automatically reseeds the database with the default showcase forms, but **any custom forms or responses you created will be permanently lost and return a 404 Not Found error**. This is an infrastructural limitation of deploying SQLite to ephemeral free cloud hosts, not a bug in the code. To test the public respondent flow reliably without risking a 404, please use the pre-seeded forms in the dashboard.
+
 ## Tech stack
 
 | Layer      | Choice                                                                 |
