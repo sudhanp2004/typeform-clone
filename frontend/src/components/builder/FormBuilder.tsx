@@ -195,6 +195,7 @@ export function FormBuilder({ formId }: { formId: string }) {
     <div className="flex h-screen flex-col">
       <BuilderHeader
         formId={formId}
+        slug={form.slug}
         title={form.title}
         status={form.status}
         activeTab={activeTab}

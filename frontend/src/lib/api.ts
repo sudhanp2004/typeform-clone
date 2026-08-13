@@ -45,7 +45,7 @@ export const createForm = (title: string) =>
 
 export const getForm = (formId: string) => request<FormDetail>(`/api/forms/${formId}`);
 
-export const updateForm = (formId: string, payload: Partial<Pick<FormDetail, "title" | "description" | "status" | "theme" | "welcome_screen" | "thank_you_screen">>) =>
+export const updateForm = (formId: string, payload: Partial<Pick<FormDetail, "title" | "description" | "status" | "theme" | "welcome_screen" | "thank_you_screen" | "slug">>) =>
   request<FormDetail>(`/api/forms/${formId}`, { method: "PATCH", body: JSON.stringify(payload) });
 
 export const duplicateForm = (formId: string) =>

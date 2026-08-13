@@ -49,6 +49,7 @@ class Form(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
     creator_id: Mapped[str] = mapped_column(ForeignKey("creators.id"), nullable=False)
+    slug: Mapped[str | None] = mapped_column(String, nullable=True, unique=True)
     title: Mapped[str] = mapped_column(String, nullable=False, default="Untitled form")
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String, nullable=False, default=FormStatus.draft.value)

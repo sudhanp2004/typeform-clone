@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import type { FormStatus } from "@/lib/types";
 
-export type BuilderTab = "content" | "workflow" | "connect";
+export type BuilderTab = "content" | "workflow" | "connect" | "share";
 
 interface BuilderHeaderProps {
   formId: string;
+  slug: string | null;
   title: string;
   status: FormStatus;
   activeTab: BuilderTab;
@@ -23,10 +24,12 @@ const TABS: { id: BuilderTab; label: string }[] = [
   { id: "content", label: "Content" },
   { id: "workflow", label: "Workflow" },
   { id: "connect", label: "Connect" },
+  { id: "share", label: "Share" },
 ];
 
 export function BuilderHeader({
   formId,
+  slug,
   title,
   status,
   activeTab,
@@ -38,7 +41,7 @@ export function BuilderHeader({
   const [localTitle, setLocalTitle] = useState(title);
   const { showToast } = useToast();
 
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/f/${formId}` : "";
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/f/${slug || formId}` : "";
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareUrl);

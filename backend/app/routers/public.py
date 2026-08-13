@@ -6,17 +6,11 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.database import get_db
+from app.deps import get_published_form
 
 router = APIRouter(prefix="/api/public/forms", tags=["public"])
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-
-
-def _get_published_form(form_id: str, db: Session) -> models.Form:
-    form = db.get(models.Form, form_id)
-    if not form or form.status != models.FormStatus.published.value:
-        raise HTTPException(status_code=404, detail="Form not found")
-    return form
 
 
 def _validate_answer(question: models.Question, value) -> None:
@@ -113,13 +107,13 @@ def _resolve_reachable_questions(
 
 @router.get("/{form_id}", response_model=schemas.PublicForm)
 def get_public_form(form_id: str, db: Session = Depends(get_db)):
-    form = _get_published_form(form_id, db)
+    form = get_published_form(form_id, db)
     return form
 
 
 @router.post("/{form_id}/responses", status_code=201)
 def start_response(form_id: str, db: Session = Depends(get_db)):
-    form = _get_published_form(form_id, db)
+    form = get_published_form(form_id, db)
     response = models.Response(form_id=form.id, is_complete=False)
     db.add(response)
     db.commit()
@@ -134,7 +128,7 @@ def submit_response(
     payload: schemas.ResponseSubmit,
     db: Session = Depends(get_db),
 ):
-    form = _get_published_form(form_id, db)
+    form = get_published_form(form_id, db)
     response = db.get(models.Response, response_id)
     if not response or response.form_id != form.id:
         raise HTTPException(status_code=404, detail="Response not found")

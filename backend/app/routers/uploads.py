@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.database import get_db
+from app.deps import get_published_form
 from app.storage import UPLOAD_DIR
 
 router = APIRouter(prefix="/api/public/forms/{form_id}/uploads", tags=["uploads"])
@@ -22,9 +23,7 @@ async def upload_file(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
-    form = db.get(models.Form, form_id)
-    if not form or form.status != models.FormStatus.published.value:
-        raise HTTPException(status_code=404, detail="Form not found")
+    form = get_published_form(form_id, db)
 
     question = next((q for q in form.questions if q.id == question_id), None)
     if not question or question.type != models.QuestionType.file_upload.value:

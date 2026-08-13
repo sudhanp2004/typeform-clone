@@ -1,6 +1,7 @@
+import re
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import case, func
 from sqlalchemy.orm import Session
 
@@ -9,6 +10,8 @@ from app.database import get_db
 from app.deps import get_default_creator, get_owned_form
 
 router = APIRouter(prefix="/api/forms", tags=["forms"])
+
+SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 
 
 @router.get("", response_model=list[schemas.FormListItem])
@@ -57,6 +60,22 @@ def update_form(
     payload: schemas.FormUpdate, db: Session = Depends(get_db), form: models.Form = Depends(get_owned_form)
 ):
     data = payload.model_dump(exclude_unset=True)
+
+    if "slug" in data and data["slug"] is not None:
+        slug = data["slug"].strip().lower()
+        if not (3 <= len(slug) <= 60) or not SLUG_RE.match(slug):
+            raise HTTPException(
+                status_code=422,
+                detail="URL must be 3-60 characters: lowercase letters, numbers, and single hyphens only",
+            )
+        taken = (
+            db.query(models.Form.id)
+            .filter(models.Form.slug == slug, models.Form.id != form.id)
+            .first()
+        )
+        if taken:
+            raise HTTPException(status_code=409, detail="This URL is already taken")
+        data["slug"] = slug
 
     if "status" in data:
         if data["status"] == "published" and form.status != "published":

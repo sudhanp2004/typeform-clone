@@ -69,6 +69,7 @@ export interface FormTheme {
 
 export interface FormDetail {
   id: string;
+  slug: string | null;
   title: string;
   description: string | null;
   status: FormStatus;

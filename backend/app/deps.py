@@ -30,3 +30,12 @@ def get_owned_form(
     if not form or form.creator_id != creator.id:
         raise HTTPException(status_code=404, detail="Form not found")
     return form
+
+
+def get_published_form(form_id: str, db: Session) -> models.Form:
+    """Resolves a public form-fill URL, which may carry either the form's raw id or a
+    creator-chosen custom slug (Share tab's "Edit" URL) — both point at the same form."""
+    form = db.get(models.Form, form_id) or db.query(models.Form).filter_by(slug=form_id).first()
+    if not form or form.status != models.FormStatus.published.value:
+        raise HTTPException(status_code=404, detail="Form not found")
+    return form

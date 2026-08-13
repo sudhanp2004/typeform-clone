@@ -80,6 +80,7 @@ class FormUpdate(BaseModel):
     theme: dict[str, Any] | None = None
     welcome_screen: dict[str, Any] | None = None
     thank_you_screen: dict[str, Any] | None = None
+    slug: str | None = None
 
 
 class FormListItem(BaseModel):
@@ -98,6 +99,7 @@ class FormDetail(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: str
+    slug: str | None
     title: str
     description: str | None
     status: str
