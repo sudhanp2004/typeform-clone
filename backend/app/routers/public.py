@@ -31,11 +31,32 @@ def _validate_answer(question: models.Question, value) -> None:
     if question.type == "email" and not EMAIL_RE.match(str(value)):
         raise HTTPException(status_code=422, detail=f"'{question.title}' must be a valid email address")
 
+    if question.type in ("short_text", "long_text"):
+        text = str(value)
+        max_length = question.options.get("max_length")
+        if max_length and len(text) > max_length:
+            raise HTTPException(status_code=422, detail=f"'{question.title}' must be {max_length} characters or fewer")
+
+        answer_format = question.options.get("answer_format")
+        if answer_format == "letters" and not re.fullmatch(r"[A-Za-z\s]*", text):
+            raise HTTPException(status_code=422, detail=f"'{question.title}' must contain letters only")
+        if answer_format == "numbers" and not re.fullmatch(r"[0-9\s]*", text):
+            raise HTTPException(status_code=422, detail=f"'{question.title}' must contain numbers only")
+        if answer_format == "alphanumeric" and not re.fullmatch(r"[A-Za-z0-9\s]*", text):
+            raise HTTPException(status_code=422, detail=f"'{question.title}' must contain only letters and numbers")
+
     if question.type == "number":
         try:
-            float(value)
+            num = float(value)
         except (TypeError, ValueError):
             raise HTTPException(status_code=422, detail=f"'{question.title}' must be a number")
+
+        min_value = question.options.get("min_value")
+        max_value = question.options.get("max_value")
+        if min_value is not None and num < min_value:
+            raise HTTPException(status_code=422, detail=f"'{question.title}' must be at least {min_value}")
+        if max_value is not None and num > max_value:
+            raise HTTPException(status_code=422, detail=f"'{question.title}' must be at most {max_value}")
 
     if question.type in ("multiple_choice", "dropdown"):
         choices = question.options.get("choices", [])

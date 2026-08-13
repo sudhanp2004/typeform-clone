@@ -276,6 +276,9 @@ export function FormBuilder({ formId }: { formId: string }) {
                   onToggleRequired={() =>
                     handleUpdateQuestion(selectedQuestion.id, { required: !selectedQuestion.required })
                   }
+                  onChangeOptions={(patch) =>
+                    handleUpdateQuestion(selectedQuestion.id, { options: { ...selectedQuestion.options, ...patch } })
+                  }
                   onChangeBranching={(branchingRules) =>
                     handleUpdateQuestion(selectedQuestion.id, { branching_rules: branchingRules })
                   }

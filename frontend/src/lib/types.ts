@@ -14,6 +14,11 @@ export type FormStatus = "draft" | "published";
 export interface QuestionOptions {
   choices?: string[];
   max_rating?: number;
+  max_length?: number | null;
+  placeholder?: string | null;
+  answer_format?: "letters" | "numbers" | "alphanumeric" | null;
+  min_value?: number | null;
+  max_value?: number | null;
 }
 
 export interface BranchingRule {

@@ -297,6 +297,31 @@ Same durability caveat as the SQLite database (see Deployment below): Render's f
 no persistent disk, so `backend/uploads/` is wiped on every redeploy/cold start. Accepted as
 a demo-scale tradeoff rather than solved with an external object store.
 
+### Question settings panel (Max characters, Answer validation, Custom placeholder text)
+
+The builder's right-hand question settings panel matches the real Typeform admin's control
+set, with the same honesty rule applied to everything else in this app: controls that map to
+a real feature are genuinely functional, and controls that would need a feature we don't
+have (Map to contacts needs a Contacts system, Video needs video upload, Image or video and
+Comments need their own subsystems) are shown disabled/"Soon" rather than as dead buttons.
+
+Real, working controls (`short_text`/`long_text`/`number` only, shown conditionally per
+type — a rating or multiple-choice question doesn't get a "Max characters" row):
+- **Max characters** — caps a short/long text answer's length, enforced three times: the
+  input's HTML `maxLength` (immediate truncation while typing), `lib/validation.ts`
+  (pre-submit client check), and `public.py::_validate_answer` (the actual source of truth).
+- **Answer validation** — for text questions, a format constraint (letters only / numbers
+  only / letters and numbers); for number questions, a min/max value range. Same
+  three-layer enforcement as above. This one is a best-effort reconstruction rather than a
+  verified match to Typeform's own UI — I didn't have its expanded state in front of me, so
+  the exact option set here is a reasonable guess, not a confirmed copy.
+- **Custom placeholder text** — overrides the default "Type your answer here…" placeholder,
+  reflected live in both the builder canvas preview and the actual respondent input.
+
+All three persist through `Question.options` (the same free-form JSON column used for
+`choices`/`max_rating`), so no schema migration was needed — just new keys
+(`max_length`, `answer_format`, `min_value`, `max_value`, `placeholder`).
+
 ## Deployment
 
 - **Backend → Render.** A `render.yaml` blueprint is included at the repo root: on Render,

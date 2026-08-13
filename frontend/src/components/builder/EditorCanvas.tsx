@@ -86,12 +86,15 @@ export function EditorCanvas({ question, accentColor, background, font, onUpdate
 
         {(question.type === "short_text" || question.type === "email" || question.type === "number") && (
           <div className="w-full max-w-sm border-b-2 border-ink/10 pb-3 text-lg text-ink/30">
-            {question.type === "email" ? "name@example.com" : question.type === "number" ? "0" : "Type your answer here…"}
+            {question.options.placeholder ||
+              (question.type === "email" ? "name@example.com" : question.type === "number" ? "0" : "Type your answer here…")}
           </div>
         )}
 
         {question.type === "long_text" && (
-          <div className="w-full border-b-2 border-ink/10 pb-3 text-lg text-ink/30">Type your answer here…</div>
+          <div className="w-full border-b-2 border-ink/10 pb-3 text-lg text-ink/30">
+            {question.options.placeholder || "Type your answer here…"}
+          </div>
         )}
 
         {question.type === "yes_no" && (

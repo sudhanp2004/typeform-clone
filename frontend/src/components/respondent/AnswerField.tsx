@@ -42,7 +42,8 @@ export function AnswerField({
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleEnter}
-          placeholder="Type your answer here…"
+          placeholder={question.options.placeholder || "Type your answer here…"}
+          maxLength={question.type === "short_text" ? question.options.max_length ?? undefined : undefined}
           className="w-full border-b-2 border-ink/15 bg-transparent pb-3 text-2xl font-medium text-ink placeholder:text-ink/25 focus:outline-none sm:text-3xl"
           style={{ borderColor: value ? accentColor : undefined }}
         />
@@ -61,7 +62,8 @@ export function AnswerField({
               onSubmitKey();
             }
           }}
-          placeholder="Type your answer here… (Cmd/Ctrl + Enter to continue)"
+          placeholder={question.options.placeholder || "Type your answer here… (Cmd/Ctrl + Enter to continue)"}
+          maxLength={question.options.max_length ?? undefined}
           rows={3}
           className="w-full border-b-2 border-ink/15 bg-transparent pb-3 text-xl font-medium text-ink placeholder:text-ink/25 focus:outline-none sm:text-2xl"
         />
