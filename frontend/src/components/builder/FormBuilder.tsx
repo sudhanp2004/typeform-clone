@@ -27,7 +27,9 @@ import { WelcomeScreenRow } from "./WelcomeScreenRow";
 import { EndingsSection } from "./EndingsSection";
 import { DesignPanel } from "./DesignPanel";
 import { defaultOptionsForType } from "./questionTypes";
-import { PublishSuccessModal } from "./PublishSuccessModal";
+import { PublishConfetti } from "./PublishConfetti";
+
+import { SharePanel } from "./SharePanel";
 
 type Selection = { kind: "question"; id: string } | { kind: "welcome" } | { kind: "ending" };
 
@@ -221,7 +223,13 @@ export function FormBuilder({ formId }: { formId: string }) {
         title={form.title}
         status={form.status}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tab) => {
+          if (tab === "results") {
+            router.push(`/forms/${formId}/responses`);
+          } else {
+            setActiveTab(tab);
+          }
+        }}
         onRename={handleRename}
         onTogglePublish={handleTogglePublish}
         onPreview={() => setPreviewOpen(true)}
@@ -324,6 +332,10 @@ export function FormBuilder({ formId }: { formId: string }) {
         />
       )}
 
+      {activeTab === "share" && (
+        <SharePanel formId={formId} slug={form.slug ?? null} status={form.status} />
+      )}
+
       <QuestionTypePicker open={addPickerOpen} onClose={() => setAddPickerOpen(false)} onPick={handleAddQuestion} />
 
       <DesignPanel
@@ -356,11 +368,7 @@ export function FormBuilder({ formId }: { formId: string }) {
         </div>
       )}
       {showPublishSuccess && (
-        <PublishSuccessModal
-          formId={formId}
-          slug={form.slug ?? null}
-          onClose={() => setShowPublishSuccess(false)}
-        />
+        <PublishConfetti active={showPublishSuccess} onDone={() => setShowPublishSuccess(false)} />
       )}
     </div>
   );

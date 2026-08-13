@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import type { FormStatus } from "@/lib/types";
 
-export type BuilderTab = "content" | "workflow" | "connect" | "share";
+export type BuilderTab = "content" | "workflow" | "connect" | "share" | "results";
 
 interface BuilderHeaderProps {
   formId: string;
@@ -20,11 +20,15 @@ interface BuilderHeaderProps {
   onPreview: () => void;
 }
 
-const TABS: { id: BuilderTab; label: string }[] = [
+const BASE_TABS: { id: BuilderTab; label: string }[] = [
   { id: "content", label: "Content" },
   { id: "workflow", label: "Workflow" },
   { id: "connect", label: "Connect" },
+];
+
+const PUBLISHED_TABS: { id: BuilderTab; label: string }[] = [
   { id: "share", label: "Share" },
+  { id: "results", label: "Results" },
 ];
 
 export function BuilderHeader({
@@ -71,7 +75,7 @@ export function BuilderHeader({
       </div>
 
       <nav className="flex shrink-0 items-center gap-1">
-        {TABS.map((tab) => (
+        {[...BASE_TABS, ...(status === "published" ? PUBLISHED_TABS : [])].map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
@@ -86,14 +90,9 @@ export function BuilderHeader({
 
       <div className="flex flex-1 shrink-0 items-center justify-end gap-2">
         {status === "published" && (
-          <>
-            <Link href={`/forms/${formId}/responses`}>
-              <Button variant="ghost">Results</Button>
-            </Link>
-            <Button variant="secondary" onClick={copyLink}>
-              Copy link
-            </Button>
-          </>
+          <Button variant="secondary" onClick={copyLink}>
+            Copy link
+          </Button>
         )}
         <Button variant="secondary" onClick={onPreview}>
           Preview
