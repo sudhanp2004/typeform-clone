@@ -24,12 +24,20 @@ class QuestionOptions(BaseModel):
     max_rating: int | None = None
 
 
+class BranchingRule(BaseModel):
+    # value that triggers this jump (compared against the respondent's answer as a string)
+    value: str
+    # id of the question to jump to, or the literal "end" to skip straight to submission
+    target_question_id: str
+
+
 class QuestionCreate(BaseModel):
     type: QuestionTypeLiteral
     title: str = ""
     description: str | None = None
     required: bool = False
     options: dict[str, Any] = Field(default_factory=dict)
+    branching_rules: list[BranchingRule] = Field(default_factory=list)
 
 
 class QuestionUpdate(BaseModel):
@@ -38,6 +46,7 @@ class QuestionUpdate(BaseModel):
     description: str | None = None
     required: bool | None = None
     options: dict[str, Any] | None = None
+    branching_rules: list[BranchingRule] | None = None
 
 
 class QuestionOut(BaseModel):
@@ -50,6 +59,7 @@ class QuestionOut(BaseModel):
     required: bool
     order_index: int
     options: dict[str, Any]
+    branching_rules: list[BranchingRule]
 
 
 class QuestionReorder(BaseModel):
@@ -110,6 +120,7 @@ class PublicQuestion(BaseModel):
     required: bool
     order_index: int
     options: dict[str, Any]
+    branching_rules: list[BranchingRule]
 
 
 class PublicForm(BaseModel):

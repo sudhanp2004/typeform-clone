@@ -60,6 +60,7 @@ export interface QuestionInput {
   description?: string | null;
   required?: boolean;
   options?: Question["options"];
+  branching_rules?: Question["branching_rules"];
 }
 
 export const addQuestion = (formId: string, payload: QuestionInput) =>

@@ -15,6 +15,13 @@ export interface QuestionOptions {
   max_rating?: number;
 }
 
+export interface BranchingRule {
+  /** answer value that triggers this jump */
+  value: string;
+  /** id of the question to jump to, or the literal "end" to skip straight to submission */
+  target_question_id: string;
+}
+
 export interface Question {
   id: string;
   type: QuestionType;
@@ -23,7 +30,15 @@ export interface Question {
   required: boolean;
   order_index: number;
   options: QuestionOptions;
+  branching_rules: BranchingRule[];
 }
+
+/** Only these answer shapes are discrete enough to branch on. */
+export const BRANCHABLE_QUESTION_TYPES: ReadonlySet<QuestionType> = new Set([
+  "multiple_choice",
+  "dropdown",
+  "yes_no",
+]);
 
 export interface FormListItem {
   id: string;

@@ -77,6 +77,10 @@ class Question(Base):
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     # choice options for multiple_choice/dropdown, max value for rating, etc.
     options: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    # logic jumps: [{"value": <answer value that triggers this rule>, "target_question_id": <question id | "end">}, ...]
+    # only meaningful for multiple_choice/dropdown/yes_no; evaluated in order, first match wins.
+    # no match (or non-branchable type) falls through to the next question in order_index.
+    branching_rules: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
 
     form: Mapped["Form"] = relationship(back_populates="questions")
     answers: Mapped[list["Answer"]] = relationship(back_populates="question", cascade="all, delete-orphan")

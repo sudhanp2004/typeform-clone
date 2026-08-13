@@ -29,6 +29,7 @@ def add_question(
         description=payload.description,
         required=payload.required,
         options=payload.options,
+        branching_rules=[rule.model_dump() for rule in payload.branching_rules],
         order_index=next_index,
     )
     db.add(question)
@@ -83,7 +84,12 @@ def delete_question(
     db.delete(question)
     db.flush()
 
-    for index, q in enumerate(sorted(form.questions, key=lambda q: q.order_index)):
+    remaining = sorted((q for q in form.questions if q.id != question_id), key=lambda q: q.order_index)
+    for index, q in enumerate(remaining):
         q.order_index = index
+        # drop any branching rule that pointed at the question we just deleted
+        pruned = [r for r in q.branching_rules if r.get("target_question_id") != question_id]
+        if len(pruned) != len(q.branching_rules):
+            q.branching_rules = pruned
 
     db.commit()

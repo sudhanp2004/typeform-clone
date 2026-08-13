@@ -3,6 +3,7 @@
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import type { PublicForm } from "@/lib/types";
+import { resolveNextQuestion } from "@/lib/branching";
 import { ProgressBar } from "./ProgressBar";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { QuestionScreen } from "./QuestionScreen";
@@ -18,22 +19,27 @@ interface RespondentFlowProps {
 
 export function RespondentFlow({ form, onComplete, previewMode }: RespondentFlowProps) {
   const [stage, setStage] = useState<Stage>("welcome");
-  const [index, setIndex] = useState(0);
+  const [currentId, setCurrentId] = useState<string | null>(form.questions[0]?.id ?? null);
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [submitting, setSubmitting] = useState(false);
 
   const accentColor = form.theme.accent_color || "#262626";
-  const question = form.questions[index];
+  const question = form.questions.find((q) => q.id === currentId) ?? null;
+
+  // Branching means "next" isn't always "index + 1", and a respondent can jump
+  // backward to a question that isn't literally the previous one in the list —
+  // so we track where they've actually been, not just a position.
+  const historyRef = useRef<string[]>([]);
+  const currentIdRef = useRef<string | null>(currentId);
 
   // Selectable answer types (multiple choice, yes/no, rating) auto-advance via
   // a short setTimeout so the selection is visible before the transition. If
-  // that timer's onAdvance closure read `answers`/`index` state directly, it
+  // that timer's onAdvance closure read `answers`/`currentId` state directly, it
   // could fire with a stale snapshot from before the just-picked value landed
   // (React state updates aren't synchronous). Refs sidestep that: they're
   // mutated the instant the value is chosen, so even a stale-closured advance
-  // call always reads the true current answers/index.
+  // call always reads the true current answers/question.
   const answersRef = useRef<Record<string, unknown>>({});
-  const indexRef = useRef(0);
 
   const setAnswer = (questionId: string, value: unknown) => {
     setAnswers((a) => {
@@ -44,11 +50,18 @@ export function RespondentFlow({ form, onComplete, previewMode }: RespondentFlow
   };
 
   const goNext = async () => {
-    if (indexRef.current < form.questions.length - 1) {
-      indexRef.current += 1;
-      setIndex(indexRef.current);
+    const current = form.questions.find((q) => q.id === currentIdRef.current);
+    if (!current) return;
+
+    const next = resolveNextQuestion(current, answersRef.current[current.id], form.questions);
+    historyRef.current.push(current.id);
+
+    if (next) {
+      currentIdRef.current = next.id;
+      setCurrentId(next.id);
       return;
     }
+
     setSubmitting(true);
     try {
       await onComplete?.(answersRef.current);
@@ -59,9 +72,10 @@ export function RespondentFlow({ form, onComplete, previewMode }: RespondentFlow
   };
 
   const goPrev = () => {
-    if (indexRef.current > 0) {
-      indexRef.current -= 1;
-      setIndex(indexRef.current);
+    const previousId = historyRef.current.pop();
+    if (previousId) {
+      currentIdRef.current = previousId;
+      setCurrentId(previousId);
     }
   };
 
@@ -87,8 +101,8 @@ export function RespondentFlow({ form, onComplete, previewMode }: RespondentFlow
 
   return (
     <div className="relative flex min-h-screen flex-1 flex-col bg-paper">
-      {stage === "question" && (
-        <ProgressBar progress={(index + 1) / form.questions.length} accentColor={accentColor} />
+      {stage === "question" && question && (
+        <ProgressBar progress={(question.order_index + 1) / form.questions.length} accentColor={accentColor} />
       )}
 
       <AnimatePresence mode="wait">
@@ -103,11 +117,11 @@ export function RespondentFlow({ form, onComplete, previewMode }: RespondentFlow
           />
         )}
 
-        {stage === "question" && (
+        {stage === "question" && question && (
           <QuestionScreen
             key={question.id}
             question={question}
-            index={index}
+            index={question.order_index}
             value={answers[question.id]}
             onChange={(v) => setAnswer(question.id, v)}
             onAdvance={goNext}

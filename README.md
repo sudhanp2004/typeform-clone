@@ -137,7 +137,8 @@ questions
 ├─ title, description
 ├─ required (bool)
 ├─ order_index (int)
-└─ options (JSON — e.g. {"choices": [...]} or {"max_rating": 5})
+├─ options (JSON — e.g. {"choices": [...]} or {"max_rating": 5})
+└─ branching_rules (JSON — [{"value": <answer>, "target_question_id": <id | "end">}, ...])
 
 responses
 ├─ id (PK)
@@ -199,13 +200,35 @@ Full interactive reference at `/docs` once the backend is running. Summary:
 - **Auth**: no login flow. The app always acts as one default creator, per the spec's
   "real creator authentication may be simplified" note.
 - **Placeholders shown as "Coming soon"**: Payment and File upload question types (visible,
-  disabled, in the type picker), advanced logic-jump branching, integrations/webhooks, and
-  team collaboration — all explicitly out of scope per the assignment.
-- **Bonus features implemented**: CSV export, partial-response/completion-rate tracking,
-  per-form accent color theming (used live in both the builder canvas and the respondent
-  flow). Logic jumps, dark mode, and the file-upload question type were left out to keep
-  the core builder/respondent flow (the two pieces the assignment weights most) polished
-  rather than spreading effort thin.
+  disabled, in the type picker), integrations/webhooks, and team collaboration — all
+  explicitly out of scope per the assignment.
+- **Bonus features implemented**: logic jumps / conditional branching (see below), CSV
+  export, partial-response/completion-rate tracking, per-form accent color theming (used
+  live in both the builder canvas and the respondent flow). Dark mode and the file-upload
+  question type were left out to keep the core builder/respondent flow (the two pieces the
+  assignment weights most) polished rather than spreading effort thin.
+
+### Logic jumps / conditional branching
+
+Available on Multiple choice, Dropdown, and Yes/No questions — for each possible answer,
+the creator can route the respondent to any other question or straight to the end of the
+form, overriding the default "next question in order" behavior. Configured from the
+question's settings panel (the "Branching" section) in the builder.
+
+This is enforced on both ends, not just presented visually:
+- **Respondent flow** (`frontend/src/lib/branching.ts`): after each answer, resolves which
+  question comes next client-side, so the fill experience actually skips/jumps rather than
+  just displaying a graph.
+- **Backend** (`backend/app/routers/public.py::_resolve_reachable_questions`): independently
+  re-derives which questions a given answer set would have reached before enforcing "required"
+  fields at submission — a required question skipped via branching correctly does *not*
+  block submission, and this is verified server-side rather than trusted from the client.
+- Deleting a question prunes any other question's branching rule that pointed at it, so
+  branching can't silently reference a question that no longer exists.
+
+The Workflow tab's node graph remains a visual, non-editable preview of the linear question
+order (dragging nodes there doesn't persist or affect routing) — the actual branching logic
+lives in the per-question settings panel described above.
 - **Seed data**: on first run against an empty database, the backend seeds 2 published
   forms (a customer feedback survey and a job application, covering all 8 question types
   between them) with several pre-existing responses each, plus 1 draft form — so the app is

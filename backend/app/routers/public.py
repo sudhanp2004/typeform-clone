@@ -55,6 +55,41 @@ def _validate_answer(question: models.Question, value) -> None:
             raise HTTPException(status_code=422, detail=f"'{question.title}' must be between 1 and {max_rating}")
 
 
+def _resolve_next_question(
+    current: models.Question, answer: object, ordered_questions: list[models.Question]
+) -> models.Question | None:
+    """Mirrors the frontend's resolveNextQuestion (lib/branching.ts) so the server can
+    independently verify which questions a respondent actually would have been shown,
+    rather than trusting the client's notion of "which page it was on"."""
+    for rule in current.branching_rules or []:
+        if str(answer) == str(rule.get("value")):
+            target_id = rule.get("target_question_id")
+            if target_id == "end":
+                return None
+            target = next((q for q in ordered_questions if q.id == target_id), None)
+            if target:
+                return target
+            break  # matched rule but its target question no longer exists; fall through to default
+
+    index = ordered_questions.index(current)
+    return ordered_questions[index + 1] if index + 1 < len(ordered_questions) else None
+
+
+def _resolve_reachable_questions(
+    ordered_questions: list[models.Question], answers: dict[str, object]
+) -> list[models.Question]:
+    if not ordered_questions:
+        return []
+    reachable: list[models.Question] = []
+    visited: set[str] = set()
+    current: models.Question | None = ordered_questions[0]
+    while current is not None and current.id not in visited:
+        visited.add(current.id)
+        reachable.append(current)
+        current = _resolve_next_question(current, answers.get(current.id), ordered_questions)
+    return reachable
+
+
 @router.get("/{form_id}", response_model=schemas.PublicForm)
 def get_public_form(form_id: str, db: Session = Depends(get_db)):
     form = _get_published_form(form_id, db)
@@ -86,10 +121,17 @@ def submit_response(
     questions_by_id = {q.id: q for q in form.questions}
     answers_by_question = {a.question_id: a for a in response.answers}
 
-    submitted_ids = {a.question_id for a in payload.answers}
     if payload.is_complete:
-        for question in form.questions:
-            if question.required and question.id not in submitted_ids:
+        # Merge already-saved answers (from earlier partial PATCH calls) with this
+        # payload so branching is resolved against the respondent's full answer set,
+        # then only require fields on the path that answer set actually reaches —
+        # a required question skipped via branching must not block submission.
+        combined_values = {qid: a.value for qid, a in answers_by_question.items()}
+        combined_values.update({a.question_id: a.value for a in payload.answers})
+        ordered_questions = sorted(form.questions, key=lambda q: q.order_index)
+        reachable = _resolve_reachable_questions(ordered_questions, combined_values)
+        for question in reachable:
+            if question.required and question.id not in combined_values:
                 raise HTTPException(status_code=422, detail=f"'{question.title}' is required")
 
     for answer_in in payload.answers:

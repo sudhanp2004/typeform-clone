@@ -3,16 +3,25 @@
 import type { Question, QuestionType } from "@/lib/types";
 import { Toggle } from "@/components/ui/Toggle";
 import { QUESTION_TYPE_META, QUESTION_TYPE_ORDER } from "./questionTypes";
+import { BranchingEditor } from "./BranchingEditor";
 
 interface QuestionSettingsPanelProps {
   question: Question;
+  allQuestions: Question[];
   onChangeType: (type: QuestionType) => void;
   onToggleRequired: () => void;
+  onChangeBranching: (branchingRules: Question["branching_rules"]) => void;
 }
 
 const COMING_SOON_TOGGLES = ["Answer validation", "Custom placeholder text", "Map to contacts"];
 
-export function QuestionSettingsPanel({ question, onChangeType, onToggleRequired }: QuestionSettingsPanelProps) {
+export function QuestionSettingsPanel({
+  question,
+  allQuestions,
+  onChangeType,
+  onToggleRequired,
+  onChangeBranching,
+}: QuestionSettingsPanelProps) {
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto border-l border-line bg-white p-5">
       <div>
@@ -67,9 +76,8 @@ export function QuestionSettingsPanel({ question, onChangeType, onToggleRequired
       </div>
 
       <div className="border-t border-line pt-4">
-        <SettingRow label="Branching" comingSoon>
-          <span className="text-lg leading-none text-ink-soft/40">+</span>
-        </SettingRow>
+        <h3 className="mb-3 text-sm font-semibold text-ink">Branching</h3>
+        <BranchingEditor question={question} allQuestions={allQuestions} onUpdate={onChangeBranching} />
       </div>
     </div>
   );

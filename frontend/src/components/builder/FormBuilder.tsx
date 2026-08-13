@@ -133,6 +133,7 @@ export function FormBuilder({ formId }: { formId: string }) {
         description: original.description,
         required: original.required,
         options: original.options,
+        branching_rules: original.branching_rules,
       });
       const baseIds = form.questions.map((q) => q.id);
       const insertAt = baseIds.indexOf(questionId) + 1;
@@ -250,11 +251,15 @@ export function FormBuilder({ formId }: { formId: string }) {
               <div className="w-72 shrink-0">
                 <QuestionSettingsPanel
                   question={selectedQuestion}
+                  allQuestions={form.questions}
                   onChangeType={(type) =>
                     handleUpdateQuestion(selectedQuestion.id, { type, options: defaultOptionsForType(type) })
                   }
                   onToggleRequired={() =>
                     handleUpdateQuestion(selectedQuestion.id, { required: !selectedQuestion.required })
+                  }
+                  onChangeBranching={(branchingRules) =>
+                    handleUpdateQuestion(selectedQuestion.id, { branching_rules: branchingRules })
                   }
                 />
               </div>
