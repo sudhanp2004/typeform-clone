@@ -213,7 +213,14 @@ Full interactive reference at `/docs` once the backend is running. Summary:
 
 ## Deployment
 
-- **Backend** → Render (or Railway): a Python web service running
-  `uvicorn app.main:app --host 0.0.0.0 --port $PORT`, with a persistent disk mounted so
-  `typeform.db` survives restarts. Set `FRONTEND_ORIGIN` to the deployed Vercel URL.
-- **Frontend** → Vercel: set `NEXT_PUBLIC_API_URL` to the deployed backend URL.
+- **Backend → Render.** A `render.yaml` blueprint is included at the repo root: on Render,
+  New → Blueprint → select this repo, and it configures the web service (build/start commands,
+  a persistent disk mounted at `backend/data` so `typeform.db` survives restarts, and the
+  `DATABASE_PATH` env var) automatically. After deploying, set the `FRONTEND_ORIGIN` env var
+  to the deployed Vercel URL (comma-separate multiple origins if needed) and redeploy.
+- **Frontend → Vercel.** Import this repo, set the project root to `frontend/`, and set
+  `NEXT_PUBLIC_API_URL` to the deployed Render backend URL.
+
+Deploy order matters for the env vars: deploy the backend first (get its URL), then the
+frontend with `NEXT_PUBLIC_API_URL` pointing at it, then go back and set the backend's
+`FRONTEND_ORIGIN` to the frontend's final URL and redeploy the backend once more so CORS allows it.
