@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { QuestionSummaryCard } from "./QuestionSummaryCard";
 import { ResponseDetailModal } from "./ResponseDetailModal";
+import { CompletionFunnel } from "./CompletionFunnel";
 
 function formatDateTime(iso: string | null) {
   if (!iso) return "—";
@@ -46,6 +47,8 @@ export function ResponsesView({ formId }: { formId: string }) {
   }
 
   const accentColor = form.theme.accent_color || "#262626";
+  const completedCount = responses.filter((r) => r.is_complete).length;
+  const completionRate = responses.length > 0 ? Math.round((completedCount / responses.length) * 100) : null;
 
   return (
     <div className="min-h-screen bg-paper-soft/40">
@@ -68,10 +71,21 @@ export function ResponsesView({ formId }: { formId: string }) {
             <p className="text-sm text-ink-soft">Total responses</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-ink">{responses.filter((r) => r.is_complete).length}</p>
+            <p className="text-3xl font-bold text-ink">{completedCount}</p>
             <p className="text-sm text-ink-soft">Completed</p>
           </div>
+          <div>
+            <p className="text-3xl font-bold text-ink">{completionRate === null ? "—" : `${completionRate}%`}</p>
+            <p className="text-sm text-ink-soft">Completion rate</p>
+          </div>
         </div>
+
+        <CompletionFunnel
+          questions={form.questions}
+          summary={summary}
+          totalResponses={responses.length}
+          accentColor={accentColor}
+        />
 
         {summary.length > 0 && (
           <div className="mb-12">

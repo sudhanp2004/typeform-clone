@@ -107,6 +107,13 @@ Open http://localhost:3000 — it redirects to `/forms`, the creator dashboard.
   "Total responses vs. Completed" stat on the results page — and it's also why the
   dashboard's response count only counts *completed* responses (an abandoned visit
   shouldn't inflate the number a creator sees).
+- **Completion rate**: the results page shows an overall `completed / total` percentage,
+  plus a **"Completion by question" funnel** — for each question, the share of all
+  responses that contain an answer for it, in form order. Under the existing
+  `total_answers` figure already computed per question (`responses.py::response_summary`),
+  this needs no extra backend work; it's a correct drop-off view precisely because a
+  response only gets an answer recorded for a question once it's actually reached it, so a
+  sharp drop between two questions is exactly where respondents are giving up.
 - **Validation is duplicated by design, not by accident**: `frontend/src/lib/validation.ts`
   and `backend/app/routers/public.py::_validate_answer` implement the same rules (required,
   email format, number, rating range, valid choice) independently. The client-side check
