@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import and_, func
+from sqlalchemy import case, func
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -13,28 +13,27 @@ router = APIRouter(prefix="/api/forms", tags=["forms"])
 
 @router.get("", response_model=list[schemas.FormListItem])
 def list_forms(db: Session = Depends(get_db), creator=Depends(get_default_creator)):
-    # Only completed submissions count toward "responses" here — a visitor who
-    # opened the link but never finished shouldn't inflate this number. The
-    # is_complete filter lives in the join condition (not a WHERE clause) so
-    # forms with zero completed responses still appear via the outer join.
+    # response_count only counts completed submissions — a visitor who opened
+    # the link but never finished shouldn't inflate the number a creator sees.
+    # total_response_count counts every started response (complete or not),
+    # so the dashboard can show a real completion rate per form.
     rows = (
         db.query(
             models.Form,
-            func.count(models.Response.id).label("response_count"),
+            func.sum(case((models.Response.is_complete.is_(True), 1), else_=0)).label("response_count"),
+            func.count(models.Response.id).label("total_response_count"),
         )
-        .outerjoin(
-            models.Response,
-            and_(models.Response.form_id == models.Form.id, models.Response.is_complete.is_(True)),
-        )
+        .outerjoin(models.Response, models.Response.form_id == models.Form.id)
         .filter(models.Form.creator_id == creator.id)
         .group_by(models.Form.id)
         .order_by(models.Form.updated_at.desc())
         .all()
     )
     out = []
-    for form, response_count in rows:
+    for form, response_count, total_response_count in rows:
         item = schemas.FormListItem.model_validate(form)
-        item.response_count = response_count
+        item.response_count = response_count or 0
+        item.total_response_count = total_response_count or 0
         out.append(item)
     return out
 

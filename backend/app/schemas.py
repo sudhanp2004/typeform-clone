@@ -91,6 +91,7 @@ class FormListItem(BaseModel):
     created_at: datetime
     updated_at: datetime
     response_count: int = 0
+    total_response_count: int = 0
 
 
 class FormDetail(BaseModel):

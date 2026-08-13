@@ -119,6 +119,15 @@ Open http://localhost:3000 — it redirects to `/forms`, the creator dashboard.
   email format, number, rating range, valid choice) independently. The client-side check
   gives instant feedback per question; the server-side check is the actual source of truth
   and is what a malicious or buggy client can't bypass.
+- **The dashboard's chrome mirrors the real Typeform admin's structure**: a top bar
+  (organization/account avatars, a Forms/Contacts/Automations tab bar), a sort dropdown
+  (Last updated / Date created / Name — all three genuinely re-sort the fetched list
+  client-side) and a list/grid view toggle over the forms table. Contacts and Automations
+  are shown as disabled tabs with a "Soon" badge rather than as buttons that do nothing on
+  click, since this app has no backing feature for either — same honesty rule already
+  applied to the Payment question type. The list view's "Completed" column is a real
+  per-form completion rate (`FormListItem.total_response_count` vs. `response_count`,
+  computed server-side in one query), not a static mockup value.
 
 ## Database schema
 

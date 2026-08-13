@@ -48,6 +48,7 @@ export interface FormListItem {
   created_at: string;
   updated_at: string;
   response_count: number;
+  total_response_count: number;
 }
 
 export interface ScreenContent {
