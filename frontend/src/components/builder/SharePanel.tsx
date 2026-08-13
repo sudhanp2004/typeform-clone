@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormStatus } from "@/lib/types";
 
 interface SharePanelProps {
@@ -16,7 +16,14 @@ export function SharePanel({ formId, slug, status }: SharePanelProps) {
       : `/f/${slug || formId}`;
 
   const [copied, setCopied] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [editingSlug, setEditingSlug] = useState(false);
+  // Slide-in from right on mount
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -35,7 +42,14 @@ export function SharePanel({ formId, slug, status }: SharePanelProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto bg-white">
+    <div
+      className="flex flex-1 flex-col overflow-y-auto bg-white"
+      style={{
+        transform: ready ? "translateX(0)" : "translateX(60px)",
+        opacity: ready ? 1 : 0,
+        transition: "transform 0.38s cubic-bezier(0.22,1,0.36,1), opacity 0.28s ease",
+      }}
+    >
       <div className="mx-auto w-full max-w-2xl px-6 py-12">
         {/* Heading */}
         <h1 className="mb-8 text-center text-[1.6rem] font-semibold tracking-tight text-ink">

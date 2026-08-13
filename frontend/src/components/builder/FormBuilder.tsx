@@ -368,7 +368,13 @@ export function FormBuilder({ formId }: { formId: string }) {
         </div>
       )}
       {showPublishSuccess && (
-        <PublishConfetti active={showPublishSuccess} onDone={() => setShowPublishSuccess(false)} />
+        <PublishConfetti
+          active={showPublishSuccess}
+          onDone={() => {
+            setShowPublishSuccess(false);
+            setActiveTab("share");
+          }}
+        />
       )}
     </div>
   );
