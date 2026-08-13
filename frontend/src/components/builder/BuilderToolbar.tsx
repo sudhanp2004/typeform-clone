@@ -16,9 +16,11 @@ interface BuilderToolbarProps {
   onAddClick: () => void;
   onPreviewClick: () => void;
   onDesignClick: () => void;
+  device: "desktop" | "mobile";
+  onToggleDevice: () => void;
 }
 
-export function BuilderToolbar({ formMode, onModeChange, onAddClick, onPreviewClick, onDesignClick }: BuilderToolbarProps) {
+export function BuilderToolbar({ formMode, onModeChange, onAddClick, onPreviewClick, onDesignClick, device, onToggleDevice }: BuilderToolbarProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const currentMode = MODES.find((m) => m.id === formMode) ?? MODES[0];
@@ -96,7 +98,7 @@ export function BuilderToolbar({ formMode, onModeChange, onAddClick, onPreviewCl
         <div className="mx-1 h-5 w-px bg-line" />
         {/* Utility icons */}
         {[
-          { glyph: "▭", label: "Device preview" },
+          { glyph: device === "desktop" ? "📱" : "💻", label: "Device preview", onClick: onToggleDevice },
           { glyph: "▶", label: "Run form", onClick: onPreviewClick },
           { glyph: "♿", label: "Accessibility check" },
           { glyph: "↻", label: "Version history" },
@@ -108,7 +110,11 @@ export function BuilderToolbar({ formMode, onModeChange, onAddClick, onPreviewCl
             onClick={onClick}
             title={label}
             aria-label={label}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-sm text-ink-soft hover:bg-paper-soft hover:text-ink"
+            className={`flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors ${
+              label === "Device preview" && device === "mobile"
+                ? "bg-ink/10 text-ink"
+                : "text-ink-soft hover:bg-paper-soft hover:text-ink"
+            }`}
           >
             {glyph}
           </button>

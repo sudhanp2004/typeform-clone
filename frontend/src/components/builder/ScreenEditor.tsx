@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/Input";
 interface ScreenEditorProps {
   kind: "welcome" | "ending";
   screen: ScreenContent;
+  device?: "desktop" | "mobile";
   onUpdate: (patch: ScreenContent) => void;
 }
 
@@ -15,7 +16,7 @@ const COPY = {
   ending: { icon: "✓", label: "Thank You Screen", placeholder: "Thanks for completing this form!" },
 };
 
-export function ScreenEditor({ kind, screen, onUpdate }: ScreenEditorProps) {
+export function ScreenEditor({ kind, screen, device = "desktop", onUpdate }: ScreenEditorProps) {
   const [title, setTitle] = useState(screen.title ?? "");
   const [subtitle, setSubtitle] = useState(screen.subtitle ?? "");
   const [redirectUrl, setRedirectUrl] = useState(screen.redirect_url ?? "");
@@ -30,7 +31,11 @@ export function ScreenEditor({ kind, screen, onUpdate }: ScreenEditorProps) {
   if (isRedirect) {
     return (
       <div className="flex w-full flex-1 flex-col items-center justify-center p-4 sm:p-8">
-        <div className="flex w-full max-w-3xl flex-col justify-center rounded-2xl bg-white px-8 py-16 shadow-[0_2px_12px_rgba(0,0,0,0.04)] sm:px-12">
+        <div className={`flex flex-col justify-center rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] transition-all duration-300 ${
+          device === "mobile"
+            ? "h-[812px] w-[375px] max-h-full px-6 py-10 ring-8 ring-ink/5"
+            : "w-full max-w-3xl px-8 py-16 sm:px-12"
+        }`}>
         <div className="mb-5 flex h-6 w-6 items-center justify-center rounded bg-blue-500 text-xs font-bold text-white">
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
             <path d="M2 6h8M6 2l4 4-4 4" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -78,7 +83,11 @@ export function ScreenEditor({ kind, screen, onUpdate }: ScreenEditorProps) {
   // ── Default screen view ───────────────────────────────────────────────────
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center p-4 sm:p-8">
-      <div className="flex w-full max-w-3xl flex-col justify-center rounded-2xl bg-white px-8 py-16 shadow-[0_2px_12px_rgba(0,0,0,0.04)] sm:px-12">
+      <div className={`flex flex-col justify-center rounded-2xl bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] transition-all duration-300 ${
+        device === "mobile"
+          ? "h-[812px] w-[375px] max-h-full px-6 py-10 ring-8 ring-ink/5"
+          : "w-full max-w-3xl px-8 py-16 sm:px-12"
+      }`}>
       <div className="mb-5 flex h-6 w-6 items-center justify-center rounded bg-ink text-xs font-bold text-white">
         {meta.icon}
       </div>

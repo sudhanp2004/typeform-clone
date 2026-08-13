@@ -41,6 +41,7 @@ export function FormBuilder({ formId }: { formId: string }) {
   const [addPickerOpen, setAddPickerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [designOpen, setDesignOpen] = useState(false);
+  const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [showPublishSuccess, setShowPublishSuccess] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
@@ -259,6 +260,8 @@ export function FormBuilder({ formId }: { formId: string }) {
             onAddClick={() => setAddPickerOpen(true)}
             onPreviewClick={() => setPreviewOpen(true)}
             onDesignClick={() => setDesignOpen(true)}
+            device={device}
+            onToggleDevice={() => setDevice(d => d === "desktop" ? "mobile" : "desktop")}
           />
 
           <div className="flex flex-1 overflow-hidden">
@@ -287,10 +290,10 @@ export function FormBuilder({ formId }: { formId: string }) {
 
             <div className="flex flex-1 flex-col overflow-y-auto bg-[#f3f3f5]">
               {selection?.kind === "welcome" && (
-                <ScreenEditor key="welcome" kind="welcome" screen={form.welcome_screen} onUpdate={handleUpdateWelcome} />
+                <ScreenEditor key="welcome" kind="welcome" screen={form.welcome_screen} device={device} onUpdate={handleUpdateWelcome} />
               )}
               {selection?.kind === "ending" && (
-                <ScreenEditor key="ending" kind="ending" screen={form.thank_you_screen} onUpdate={handleUpdateThankYou} />
+                <ScreenEditor key="ending" kind="ending" screen={form.thank_you_screen} device={device} onUpdate={handleUpdateThankYou} />
               )}
               {selection?.kind === "question" && selectedQuestion && (
                 <EditorCanvas
@@ -299,6 +302,7 @@ export function FormBuilder({ formId }: { formId: string }) {
                   accentColor={accentColor}
                   background={form.theme.background}
                   font={form.theme.font}
+                  device={device}
                   onUpdate={(patch) => handleUpdateQuestion(selectedQuestion.id, patch)}
                 />
               )}
