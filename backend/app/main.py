@@ -6,13 +6,13 @@ from fastapi.staticfiles import StaticFiles
 
 from app.database import Base, SessionLocal, engine
 from app.routers import forms, public, questions, responses, uploads
-from app.seed import seed_if_empty
+from app.seed import seed_always
 from app.storage import UPLOAD_DIR
 
 Base.metadata.create_all(bind=engine)
 
 with SessionLocal() as db:
-    seed_if_empty(db)
+    seed_always(db)
 
 app = FastAPI(title="Typeform Clone API", version="1.0.0")
 

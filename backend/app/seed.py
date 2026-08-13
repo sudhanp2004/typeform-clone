@@ -6,15 +6,24 @@ from app import models
 from app.deps import DEFAULT_CREATOR_EMAIL
 
 
-def seed_if_empty(db: Session) -> None:
-    if db.query(models.Form).count() > 0:
-        return
+def seed_always(db: Session) -> None:
+    """Wipe all data and reseed on every startup.
 
-    creator = db.query(models.Creator).filter_by(email=DEFAULT_CREATOR_EMAIL).first()
-    if creator is None:
-        creator = models.Creator(name="Default Creator", email=DEFAULT_CREATOR_EMAIL)
-        db.add(creator)
-        db.flush()
+    Render's free tier uses an ephemeral filesystem — the SQLite file is wiped
+    on every redeploy/cold-start, so always reseeding keeps the demo data
+    consistent rather than presenting a mix of stale and fresh IDs.
+    """
+    # Delete in dependency order to satisfy FK constraints
+    db.query(models.Answer).delete()
+    db.query(models.Response).delete()
+    db.query(models.Question).delete()
+    db.query(models.Form).delete()
+    db.query(models.Creator).delete()
+    db.commit()
+
+    creator = models.Creator(name="Default Creator", email=DEFAULT_CREATOR_EMAIL)
+    db.add(creator)
+    db.flush()
 
     _seed_feedback_form(db, creator)
     _seed_job_application_form(db, creator)
