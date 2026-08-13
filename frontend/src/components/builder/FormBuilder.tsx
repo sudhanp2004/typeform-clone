@@ -27,6 +27,7 @@ import { WelcomeScreenRow } from "./WelcomeScreenRow";
 import { EndingsSection } from "./EndingsSection";
 import { DesignPanel } from "./DesignPanel";
 import { defaultOptionsForType } from "./questionTypes";
+import { PublishSuccessModal } from "./PublishSuccessModal";
 
 type Selection = { kind: "question"; id: string } | { kind: "welcome" } | { kind: "ending" };
 
@@ -38,6 +39,7 @@ export function FormBuilder({ formId }: { formId: string }) {
   const [addPickerOpen, setAddPickerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [designOpen, setDesignOpen] = useState(false);
+  const [showPublishSuccess, setShowPublishSuccess] = useState(false);
   const { showToast } = useToast();
   const router = useRouter();
 
@@ -90,7 +92,11 @@ export function FormBuilder({ formId }: { formId: string }) {
     try {
       const updated = await updateForm(formId, { status: nextStatus });
       setForm(updated);
-      showToast(nextStatus === "published" ? "Form published" : "Form unpublished", "success");
+      if (nextStatus === "published") {
+        setShowPublishSuccess(true);
+      } else {
+        showToast("Form unpublished", "success");
+      }
     } catch {
       showToast("Couldn't update the form's status", "error");
     }
@@ -348,6 +354,13 @@ export function FormBuilder({ formId }: { formId: string }) {
             previewMode
           />
         </div>
+      )}
+      {showPublishSuccess && (
+        <PublishSuccessModal
+          formId={formId}
+          slug={form.slug ?? null}
+          onClose={() => setShowPublishSuccess(false)}
+        />
       )}
     </div>
   );
